@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToOrganization;
+use Database\Factories\CustomerFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -10,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Customer extends Model
 {
     use BelongsToOrganization;
+
+    /** @use HasFactory<CustomerFactory> */
+    use HasFactory;
 
     private const TITLES = ['znj.', 'z.', 'mrs', 'mrs.', 'mr', 'mr.', 'ms', 'ms.', 'miss', 'dr', 'dr.', 'zonja', 'zoti'];
 

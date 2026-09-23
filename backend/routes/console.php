@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Drafts follow-ups for unanswered quotes (never sends them) and closes silent or expired ones.
+Schedule::command('quotes:follow-up')->hourly()->withoutOverlapping();

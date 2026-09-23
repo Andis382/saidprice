@@ -2,23 +2,14 @@
 
 namespace App\Providers;
 
+use App\Quotes\Parsing\QuoteParser;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
-    }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
+        // Phone numbers said without a country code belong to the business's country.
+        $this->app->bind(QuoteParser::class, fn () => new QuoteParser((string) config('product.default_country_code', '355')));
     }
 }

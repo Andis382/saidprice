@@ -3,8 +3,12 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToOrganization;
+use App\Quotes\EventType;
 use App\Quotes\QuoteOutcome;
 use App\Quotes\QuoteStatus;
+use Database\Factories\QuoteFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Quote extends Model
 {
     use BelongsToOrganization;
+
+    /** @use HasFactory<QuoteFactory> */
+    use HasFactory;
 
     public const SOURCE_VOICE = 'VOICE';
 
@@ -87,11 +94,49 @@ class Quote extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /** Adds a line to the timeline. */
+    public function record(
+        EventType $type,
+        string $actor,
+        ?User $user = null,
+        ?string $channel = null,
+        ?string $body = null,
+        array $meta = [],
+    ): QuoteEvent {
+        return $this->events()->create([
+            'type' => $type,
+            'actor' => $actor,
+            'user_id' => $user?->id,
+            'channel' => $channel,
+            'body' => $body,
+            'meta' => $meta ?: null,
+            'created_at' => now(),
+        ]);
+    }
+
+    /** What the quote is for, even when nobody typed a title. */
+    public function displayTitle(): string
+    {
+        if ($this->title) {
+            return $this->title;
+        }
+        $first = $this->relationLoaded('items') ? $this->items->first() : $this->items()->first();
+
+        return $first?->description ?? trans('quotes.untitled', ['number' => $this->number], $this->customerLocale());
+    }
+
     /** Accepted counts as won unless the tradesperson says the job fell through. */
     public function isWon(): bool
     {
         return $this->outcome === QuoteOutcome::Won
             || ($this->status === QuoteStatus::Accepted && $this->outcome !== QuoteOutcome::Lost);
+    }
+
+    /** isWon() in SQL, for counts and sums. */
+    public function scopeWon(Builder $query): void
+    {
+        $query->where(fn (Builder $q) => $q->where('outcome', QuoteOutcome::Won)
+            ->orWhere(fn (Builder $q) => $q->where('status', QuoteStatus::Accepted)->where(fn (Builder $q) => $q->whereNull('outcome')->orWhere('outcome', '!=', QuoteOutcome::Lost))));
     }
 
     /** The language the customer reads: theirs, else the business's. */

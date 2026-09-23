@@ -58,7 +58,7 @@ final class QuoteParser
         $international = '(?<![\d+])\+\d{1,3}(?:[\s.-]?\d){6,12}(?!\d)';
         if (preg_match("/{$label}({$albanian}|{$international})/iu", $text, $m, PREG_OFFSET_CAPTURE)) {
             $quote->customerPhone = Phones::normalize($m[1][0], $this->countryCode);
-            $text = trim(substr_replace($text, ',', $m[0][1], strlen($m[0][0])), " ,");
+            $text = trim(substr_replace($text, ',', $m[0][1], strlen($m[0][0])), ' ,');
         }
 
         return $text;

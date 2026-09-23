@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\SetLocaleFromRequest;
+use App\Quotes\QuoteStateException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -28,4 +29,5 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => __('errors.validation'), 'errors' => $e->errors()], $e->status);
             }
         });
+        $exceptions->render(fn (QuoteStateException $e) => response()->json(['message' => $e->getMessage()], 409));
     })->create();

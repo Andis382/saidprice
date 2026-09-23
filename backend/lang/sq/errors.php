@@ -8,4 +8,6 @@ return [
     'cannot_remove_self' => 'Nuk mund ta hiqni veten.',
     'file_missing' => 'Zgjidhni fillimisht një skedar.',
     'file_type' => 'Ky lloj skedari nuk mbështetet.',
+    'phone' => 'Shkruani një numër si 069 123 4567 ose +355 69 123 4567.',
+    'phone_taken' => 'Ky numër i përket tashmë klientit :name.',
 ];

@@ -10,6 +10,7 @@ use App\Support\Phones;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class MessagesController extends Controller
 {
@@ -37,21 +38,25 @@ class MessagesController extends Controller
         return response()->json($message->toApi());
     }
 
-    /** Demo only: pretend a customer replied on WhatsApp, and show what the app answered. */
+    /**
+     * Demo only: pretend a customer replied on WhatsApp (or the business sent a voice note
+     * to the platform number), and show what the app answered.
+     */
     public function simulate(Request $request, InboundDispatcher $dispatcher): JsonResponse
     {
         abort_unless(config('product.demo'), 404);
         $data = $request->validate([
             'from' => ['required', 'string', 'max:40'],
-            'body' => ['required', 'string', 'max:1000'],
+            'kind' => ['nullable', Rule::in(['text', 'audio'])],
+            'body' => ['required_unless:kind,audio', 'nullable', 'string', 'max:1000'],
         ]);
         $from = Phones::normalize($data['from']);
         $lastId = (int) OutboundMessage::withoutGlobalScope('organization')->max('id');
 
         $inbound = $dispatcher->receive(new InboundMessage([
             'from_phone' => $from,
-            'body' => $data['body'],
-            'kind' => 'text',
+            'body' => $data['body'] ?? null,
+            'kind' => $data['kind'] ?? 'text',
             'provider_message_id' => 'sim-'.Str::uuid(),
         ]));
 

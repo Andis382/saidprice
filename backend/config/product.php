@@ -1,5 +1,8 @@
 <?php
 
+use App\Messaging\Handlers\BusinessDraftHandler;
+use App\Messaging\Handlers\CustomerReplyHandler;
+
 /*
  * Everything product-specific the app reads from the environment, in one place.
  * Defaults are safe for local development; production sets the secrets.
@@ -24,7 +27,10 @@ return [
         // "log" keeps messages in the outbox only; "whatsapp" sends through the Cloud API.
         'driver' => env('MESSAGING_DRIVER', 'log'),
         // App\Messaging\InboundHandler classes, tried in order for each customer message.
-        'inbound_handlers' => [],
+        'inbound_handlers' => [
+            BusinessDraftHandler::class,
+            CustomerReplyHandler::class,
+        ],
         'whatsapp' => [
             'token' => env('WHATSAPP_TOKEN', ''),
             'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID', ''),

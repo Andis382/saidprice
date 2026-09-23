@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'quote' => 'Ofertë',
+    'date' => 'Data',
+    'valid_until' => 'E vlefshme deri më',
+    'for' => 'Për',
+    'phone' => 'Telefon',
+    'job' => 'Puna',
+    'proposed' => 'Data e propozuar',
+    'description' => 'Përshkrimi',
+    'qty' => 'Sasia',
+    'unit_price' => 'Çmimi për njësi',
+    'amount' => 'Shuma',
+    'kinds' => ['PARTS' => 'Pjesë', 'LABOUR' => 'Punë', 'OTHER' => 'Të tjera'],
+    'subtotal_parts' => 'Pjesë',
+    'subtotal_labour' => 'Punë',
+    'total' => 'Totali',
+    'notes' => 'Shënime',
+    'terms' => 'Kushtet',
+    'answer_online' => 'Pranojeni ose refuzojeni online',
+    'accepted_on' => 'Pranuar më :date',
+    'declined_on' => 'Refuzuar më :date',
+    'expired' => 'Kjo ofertë skadoi më :date',
+    'footer' => 'Ofertë me shkrim nga :business. Çmimet në :currency.',
+];

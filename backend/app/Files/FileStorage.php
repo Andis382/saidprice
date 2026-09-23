@@ -54,6 +54,12 @@ class FileStorage
         return Storage::disk('local')->get($file->path);
     }
 
+    public function delete(StoredFile $file): void
+    {
+        Storage::disk('local')->delete($file->path);
+        $file->delete();
+    }
+
     private function baseType(?string $contentType): string
     {
         return strtolower(trim(explode(';', (string) $contentType)[0])) ?: 'application/octet-stream';

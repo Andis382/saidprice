@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'quote' => 'Quote',
+    'date' => 'Date',
+    'valid_until' => 'Valid until',
+    'for' => 'For',
+    'phone' => 'Phone',
+    'job' => 'Job',
+    'proposed' => 'Proposed date',
+    'description' => 'Description',
+    'qty' => 'Qty',
+    'unit_price' => 'Unit price',
+    'amount' => 'Amount',
+    'kinds' => ['PARTS' => 'Parts', 'LABOUR' => 'Labour', 'OTHER' => 'Other'],
+    'subtotal_parts' => 'Parts',
+    'subtotal_labour' => 'Labour',
+    'total' => 'Total',
+    'notes' => 'Notes',
+    'terms' => 'Terms',
+    'answer_online' => 'Accept or decline online',
+    'accepted_on' => 'Accepted on :date',
+    'declined_on' => 'Declined on :date',
+    'expired' => 'This quote expired on :date',
+    'footer' => 'Written quote from :business. Prices in :currency.',
+];
