@@ -15,7 +15,7 @@ return [
     'needs_items' => 'Shtoni të paktën një rresht me çmim.',
     'not_answerable' => 'Kjo ofertë nuk mund të marrë më përgjigje këtu.',
     'only_drafts_deleted' => 'Fshihen vetëm draftet. Shënojeni këtë si të humbur.',
-    'nudge_not_pending' => 'Ky kujtues është dërguar ose hequr tashmë.',
+    'nudge_not_pending' => 'Ky rikujtim është dërguar ose hequr tashmë.',
     'status' => [
         'DRAFT' => 'draft',
         'SENT' => 'e dërguar',

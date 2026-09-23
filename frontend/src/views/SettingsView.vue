@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { PhBuildings, PhLinkSimple, PhTrash, PhUserCircle, PhUsersThree } from '@phosphor-icons/vue'
+import { PhBuildings, PhLinkSimple, PhNotepad, PhTrash, PhUserCircle, PhUsersThree } from '@phosphor-icons/vue'
+import UiStepper from '@/components/ui/UiStepper.vue'
+import UiTextarea from '@/components/ui/UiTextarea.vue'
 import AppPage from '@/components/layout/AppPage.vue'
 import UiCard from '@/components/ui/UiCard.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -40,7 +42,20 @@ const org = useForm({
   timezone: auth.organization?.timezone ?? 'Europe/Tirane',
   currency: auth.organization?.currency ?? 'EUR',
 })
-const invite = useForm({ name: '', role: INVITE_ROLES[0] ?? 'MEMBER' })
+const invite = useForm({ name: '', role: INVITE_ROLES[0] ?? 'ASSISTANT' })
+
+type Quoting = { trade: string | null; defaultValidityDays: number; firstNudgeHours: number; secondNudgeDays: number; terms: string | null }
+const quoting = useForm({ trade: '', defaultValidityDays: 14 as number | null, firstNudgeHours: 48 as number | null, secondNudgeDays: 5 as number | null, terms: '' })
+
+async function loadQuoting() {
+  const q = await api.get<Quoting>('/settings/quoting')
+  quoting.fill({ trade: q.trade ?? '', defaultValidityDays: q.defaultValidityDays, firstNudgeHours: q.firstNudgeHours, secondNudgeDays: q.secondNudgeDays, terms: q.terms ?? '' })
+}
+
+async function saveQuoting() {
+  const saved = await quoting.submit(() => api.put<Quoting>('/settings/quoting', quoting.data))
+  if (saved) toasts.success(t('settings.saved'))
+}
 
 const members = ref<Member[]>([])
 const pending = ref<Pending[]>([])
@@ -63,7 +78,7 @@ async function loadTeam() {
   pending.value = team.invitations
 }
 
-onMounted(loadTeam)
+onMounted(() => Promise.all([loadTeam(), loadQuoting()]))
 
 async function saveProfile() {
   const me = await profile.submit(() => api.put<Me>('/auth/me', profile.data))
@@ -132,7 +147,7 @@ async function removeMember(m: Member) {
               <UiInput :id="id" v-model="org.data.name" :invalid="invalid" :describedby="describedby" :disabled="!isOwner" />
             </template>
           </UiField>
-          <UiField id="f-org-phone" :label="$t('settings.phone')" :error="org.error('phone')">
+          <UiField id="f-org-phone" :label="$t('settings.phone')" :hint="$t('settings.phoneHint')" :error="org.error('phone')">
             <template #default="{ id, invalid, describedby }">
               <UiInput :id="id" v-model="org.data.phone" type="tel" inputmode="tel" :invalid="invalid" :describedby="describedby" :disabled="!isOwner" />
             </template>
@@ -153,6 +168,32 @@ async function removeMember(m: Member) {
             </UiField>
           </div>
           <div v-if="isOwner"><UiButton type="submit" :loading="org.processing.value">{{ $t('common.save') }}</UiButton></div>
+        </form>
+      </UiCard>
+
+      <UiCard class="span-all" :title="$t('settings.quoting.title')" :subtitle="$t('settings.quoting.subtitle')" :icon="PhNotepad">
+        <form class="quoting" novalidate @submit.prevent="saveQuoting">
+          <UiFormErrors :errors="quoting.errors.value" :trigger="quoting.submitted.value" :ids="{ trade: 'f-trade', terms: 'f-terms' }" />
+          <UiField id="f-trade" :label="$t('settings.quoting.trade')" :hint="$t('settings.quoting.tradeHint')" :error="quoting.error('trade')" class="quoting__wide">
+            <template #default="{ id, invalid, describedby }">
+              <UiInput :id="id" v-model="quoting.data.trade" :invalid="invalid" :describedby="describedby" :disabled="!isOwner" maxlength="120" />
+            </template>
+          </UiField>
+          <UiField id="f-validity" :label="$t('settings.quoting.validity')" :hint="$t('settings.quoting.validityHint')" :error="quoting.error('defaultValidityDays')">
+            <UiStepper id="f-validity" v-model="quoting.data.defaultValidityDays" :label="$t('settings.quoting.validity')" :min="1" :max="90" />
+          </UiField>
+          <UiField id="f-first" :label="$t('settings.quoting.firstNudge')" :hint="$t('settings.quoting.firstNudgeHint')" :error="quoting.error('firstNudgeHours')">
+            <UiStepper id="f-first" v-model="quoting.data.firstNudgeHours" :label="$t('settings.quoting.firstNudge')" :min="12" :max="336" :step="12" />
+          </UiField>
+          <UiField id="f-second" :label="$t('settings.quoting.secondNudge')" :hint="$t('settings.quoting.secondNudgeHint')" :error="quoting.error('secondNudgeDays')">
+            <UiStepper id="f-second" v-model="quoting.data.secondNudgeDays" :label="$t('settings.quoting.secondNudge')" :min="2" :max="30" />
+          </UiField>
+          <UiField id="f-terms" :label="$t('settings.quoting.terms')" :hint="$t('settings.quoting.termsHint')" :error="quoting.error('terms')" class="quoting__wide">
+            <template #default="{ id, invalid, describedby }">
+              <UiTextarea :id="id" v-model="quoting.data.terms" :rows="3" :invalid="invalid" :describedby="describedby" :disabled="!isOwner" maxlength="4000" />
+            </template>
+          </UiField>
+          <div v-if="isOwner" class="quoting__wide"><UiButton type="submit" :loading="quoting.processing.value">{{ $t('common.save') }}</UiButton></div>
         </form>
       </UiCard>
 
@@ -259,5 +300,19 @@ async function removeMember(m: Member) {
 }
 .invite > .field {
   flex: 1 1 200px;
+}
+.quoting {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 20px;
+  align-items: start;
+}
+.quoting__wide {
+  grid-column: 1 / -1;
+}
+@media (max-width: 860px) {
+  .quoting {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

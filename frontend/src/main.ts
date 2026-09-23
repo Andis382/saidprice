@@ -1,5 +1,5 @@
-import '@fontsource-variable/plus-jakarta-sans'
-import '@fontsource-variable/jetbrains-mono'
+import '@fontsource-variable/bricolage-grotesque'
+import '@fontsource-variable/inter'
 import './styles/tokens.css'
 import './styles/base.css'
 

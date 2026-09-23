@@ -6,21 +6,29 @@ import BrandMark from './BrandMark.vue'
 import LanguageSwitch from './LanguageSwitch.vue'
 import UiAvatar from '@/components/ui/UiAvatar.vue'
 import UiDialog from '@/components/ui/UiDialog.vue'
-import { NAV } from '@/nav'
+import { NAV, type NavItem } from '@/nav'
 import { useAuth } from '@/stores/auth'
+import { useOverview } from '@/stores/overview'
 
 const auth = useAuth()
+const overview = useOverview()
 const route = useRoute()
 const router = useRouter()
 
 const items = computed(() => NAV.filter((i) => !i.roles || auth.hasRole(...i.roles)))
-const primary = computed(() => items.value.filter((i) => i.primary).slice(0, 4))
+const links = computed(() => items.value.filter((i) => !i.cta))
+const cta = computed(() => items.value.find((i) => i.cta))
+const primary = computed(() => links.value.filter((i) => i.primary).slice(0, 3))
 const moreOpen = ref(false)
 const userOpen = ref(false)
 const userRoot = ref<HTMLElement | null>(null)
 
 function isActive(name: string) {
   return route.name === name || route.meta.nav === name || route.matched.some((r) => r.name === name)
+}
+
+function badge(item: NavItem): number {
+  return item.badge ? overview[item.badge] : 0
 }
 
 async function signOut() {
@@ -43,7 +51,9 @@ watch(
   () => {
     moreOpen.value = false
     userOpen.value = false
+    overview.refresh()
   },
+  { immediate: true },
 )
 onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
 </script>
@@ -54,13 +64,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
 
     <header class="band">
       <div class="band__bar wrap">
-        <RouterLink :to="{ name: 'home' }" class="band__brand" :aria-label="$t('app.name')">
+        <RouterLink :to="{ name: 'quotes' }" class="band__brand" :aria-label="$t('app.name')">
           <BrandMark />
         </RouterLink>
 
         <nav class="band__nav" :aria-label="$t('common.menu')">
           <RouterLink
-            v-for="i in items"
+            v-for="i in links"
             :key="i.name"
             :to="{ name: i.name }"
             class="navlink"
@@ -69,10 +79,15 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
           >
             <component :is="i.icon" :size="18" :weight="isActive(i.name) ? 'fill' : 'bold'" aria-hidden="true" />
             <span>{{ $t(i.label) }}</span>
+            <span v-if="badge(i)" class="navlink__badge num">{{ badge(i) }}</span>
           </RouterLink>
         </nav>
 
         <div class="band__tools">
+          <RouterLink v-if="cta" :to="{ name: cta.name }" class="band__cta">
+            <component :is="cta.icon" :size="18" weight="bold" aria-hidden="true" />
+            {{ $t(cta.label) }}
+          </RouterLink>
           <LanguageSwitch inverse class="band__lang" />
           <div ref="userRoot" class="user">
             <button type="button" class="user__btn" :aria-expanded="userOpen" aria-haspopup="menu" @click="userOpen = !userOpen">
@@ -108,17 +123,30 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
     </main>
 
     <nav class="tabbar" :aria-label="$t('common.menu')">
-      <RouterLink
-        v-for="i in primary"
-        :key="i.name"
-        :to="{ name: i.name }"
-        class="tabbar__item"
-        :class="{ 'is-active': isActive(i.name) }"
-        :aria-current="isActive(i.name) ? 'page' : undefined"
-      >
-        <span class="tabbar__icon"><component :is="i.icon" :size="22" :weight="isActive(i.name) ? 'fill' : 'regular'" aria-hidden="true" /></span>
-        <span class="tabbar__label">{{ $t(i.label) }}</span>
-      </RouterLink>
+      <template v-for="(i, index) in primary" :key="i.name">
+        <RouterLink
+          v-if="cta && index === 2"
+          :to="{ name: cta.name }"
+          class="tabbar__cta"
+          :class="{ 'is-active': isActive(cta.name) }"
+          :aria-label="$t(cta.label)"
+        >
+          <span class="tabbar__cta-disc"><component :is="cta.icon" :size="26" weight="fill" aria-hidden="true" /></span>
+          <span class="tabbar__label">{{ $t('nav.record') }}</span>
+        </RouterLink>
+        <RouterLink
+          :to="{ name: i.name }"
+          class="tabbar__item"
+          :class="{ 'is-active': isActive(i.name) }"
+          :aria-current="isActive(i.name) ? 'page' : undefined"
+        >
+          <span class="tabbar__icon">
+            <component :is="i.icon" :size="22" :weight="isActive(i.name) ? 'fill' : 'regular'" aria-hidden="true" />
+            <span v-if="badge(i)" class="tabbar__badge num">{{ badge(i) }}</span>
+          </span>
+          <span class="tabbar__label">{{ $t(i.label) }}</span>
+        </RouterLink>
+      </template>
       <button type="button" class="tabbar__item" :aria-expanded="moreOpen" @click="moreOpen = true">
         <span class="tabbar__icon"><PhDotsThreeOutline :size="22" aria-hidden="true" /></span>
         <span class="tabbar__label">{{ $t('common.more') }}</span>
@@ -127,9 +155,10 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
 
     <UiDialog v-model:open="moreOpen" :title="auth.organization?.name ?? $t('common.more')" :description="auth.user?.name">
       <nav class="sheet-nav" :aria-label="$t('common.more')">
-        <RouterLink v-for="i in items" :key="i.name" :to="{ name: i.name }" class="sheet-nav__item" :class="{ 'is-active': isActive(i.name) }">
+        <RouterLink v-for="i in links" :key="i.name" :to="{ name: i.name }" class="sheet-nav__item" :class="{ 'is-active': isActive(i.name) }">
           <span class="sheet-nav__icon"><component :is="i.icon" :size="20" weight="duotone" aria-hidden="true" /></span>
           {{ $t(i.label) }}
+          <span v-if="badge(i)" class="navlink__badge num">{{ badge(i) }}</span>
         </RouterLink>
       </nav>
       <div class="sheet-foot">
@@ -145,7 +174,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
 <style scoped>
 .shell {
   min-height: 100dvh;
-  padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 24px);
+  padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 28px);
 }
 @media (min-width: 900px) {
   .shell {
@@ -164,21 +193,24 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   position: relative;
   color: var(--header-text);
   background:
-    radial-gradient(900px 320px at 12% -10%, var(--header-glow), transparent 65%),
-    radial-gradient(700px 260px at 95% 0%, rgb(255 255 255 / 0.07), transparent 60%),
-    linear-gradient(120deg, var(--header-from) 0%, var(--header-via) 55%, var(--header-to) 100%);
+    radial-gradient(760px 300px at 8% -30%, var(--header-glow), transparent 70%),
+    radial-gradient(640px 260px at 96% 0%, rgb(255 255 255 / 0.05), transparent 60%),
+    linear-gradient(118deg, var(--header-from) 0%, var(--header-via) 55%, var(--header-to) 100%);
+  border-top: 3px solid var(--header-stripe);
   padding-bottom: 64px;
   isolation: isolate;
 }
 .band::before {
-  /* fine dot texture */
+  /* fine grid, like the ruled plate on a tool case */
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px);
-  background-size: 18px 18px;
-  mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 90%);
 }
 .band::after {
   content: '';
@@ -187,7 +219,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   right: 0;
   bottom: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.18), transparent);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.16), transparent);
 }
 .band__bar {
   display: flex;
@@ -233,21 +265,71 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   background: rgb(255 255 255 / 0.08);
 }
 .navlink.is-active {
-  color: var(--header-from);
-  background: rgb(255 255 255 / 0.94);
+  color: var(--on-primary);
+  background: linear-gradient(180deg, var(--primary-fill-from), var(--primary-fill-to));
   box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.18),
-    0 6px 16px -6px rgb(0 0 0 / 0.35);
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 6px 16px -6px rgb(250 204 21 / 0.45);
 }
 .navlink:focus-visible {
   outline: 3px solid rgb(255 255 255 / 0.55);
   outline-offset: 2px;
+}
+.navlink__badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1;
+}
+.navlink.is-active .navlink__badge {
+  background: var(--gray-900);
+  color: var(--brand-300);
 }
 .band__tools {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-left: auto;
+}
+.band__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px 0 14px;
+  border: 1px solid var(--primary-edge);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, var(--primary-fill-from), var(--primary-fill-to));
+  color: var(--on-primary);
+  font-size: var(--text-sm);
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow:
+    var(--primary-inner),
+    0 8px 20px -8px rgb(250 204 21 / 0.55);
+  transition:
+    transform var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
+}
+.band__cta:hover {
+  color: var(--on-primary);
+  transform: translateY(-1px);
+  box-shadow:
+    var(--primary-inner),
+    0 12px 24px -8px rgb(250 204 21 / 0.65);
+}
+.band__cta:focus-visible {
+  outline: 3px solid rgb(255 255 255 / 0.55);
+  outline-offset: 2px;
 }
 .user {
   position: relative;
@@ -260,13 +342,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   padding: 0 10px 0 6px;
   border: 1px solid rgb(255 255 255 / 0.14);
   border-radius: var(--radius-pill);
-  background: rgb(255 255 255 / 0.07);
+  background: rgb(255 255 255 / 0.06);
   color: var(--header-text);
   transition: background-color var(--duration) var(--ease);
 }
 .user__btn:hover,
 .user__btn[aria-expanded='true'] {
-  background: rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.12);
 }
 .user__btn:focus-visible {
   outline: 3px solid rgb(255 255 255 / 0.55);
@@ -341,7 +423,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   outline: none;
 }
 
-/* Bottom tab bar on phones */
+/* Bottom tab bar on phones, with the record button raised in the middle */
 .tabbar {
   position: fixed;
   z-index: 30;
@@ -349,13 +431,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   right: 0;
   bottom: 0;
   display: none;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: end;
   padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-  background: rgb(255 255 255 / 0.94);
+  background: rgb(255 255 255 / 0.95);
   backdrop-filter: blur(14px) saturate(1.4);
   border-top: 1px solid var(--border);
-  box-shadow: 0 -10px 30px -12px rgb(16 24 40 / 0.18);
+  box-shadow: 0 -10px 30px -12px rgb(23 23 26 / 0.18);
 }
 .tabbar__item {
   display: flex;
@@ -372,6 +454,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   text-decoration: none;
 }
 .tabbar__icon {
+  position: relative;
   display: grid;
   place-items: center;
   width: 52px;
@@ -379,17 +462,65 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   border-radius: var(--radius-pill);
   transition: background-color var(--duration) var(--ease);
 }
+.tabbar__badge {
+  position: absolute;
+  top: -3px;
+  right: 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 2px solid var(--surface);
+  border-radius: var(--radius-pill);
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 14px;
+  text-align: center;
+}
 .tabbar__item.is-active {
   color: var(--primary-strong);
 }
 .tabbar__item.is-active .tabbar__icon {
   background: var(--primary-soft);
 }
-.tabbar__item:focus-visible {
+.tabbar__item:focus-visible,
+.tabbar__cta:focus-visible {
   outline: none;
 }
-.tabbar__item:focus-visible .tabbar__icon {
+.tabbar__item:focus-visible .tabbar__icon,
+.tabbar__cta:focus-visible .tabbar__cta-disc {
   box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.tabbar__cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-top: -26px;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 750;
+  text-decoration: none;
+}
+.tabbar__cta-disc {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border: 4px solid var(--surface);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, var(--primary-fill-from), var(--primary-fill-to) 70%);
+  color: var(--on-primary);
+  box-shadow:
+    0 0 0 1px var(--primary-edge),
+    0 10px 22px -8px rgb(202 138 4 / 0.8),
+    var(--primary-inner);
+}
+.tabbar__cta.is-active .tabbar__cta-disc {
+  background: var(--gray-900);
+  color: var(--brand-300);
+  box-shadow: 0 0 0 1px var(--gray-900), 0 10px 22px -8px rgb(0 0 0 / 0.5);
 }
 
 .sheet-nav {
@@ -411,6 +542,9 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   font-size: var(--text-sm);
   text-decoration: none;
   box-shadow: var(--shadow-xs);
+}
+.sheet-nav__item .navlink__badge {
+  margin-left: auto;
 }
 .sheet-nav__item.is-active {
   border-color: var(--primary-soft-border);
@@ -453,11 +587,16 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   transform: translateY(-4px);
 }
 
-@media (max-width: 899px) {
-  .band__nav,
+@media (max-width: 1180px) {
   .band__lang,
   .user__who,
   .user__caret {
+    display: none;
+  }
+}
+@media (max-width: 899px) {
+  .band__nav,
+  .band__cta {
     display: none;
   }
   .band__bar {

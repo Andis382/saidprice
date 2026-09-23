@@ -18,9 +18,9 @@ export default defineConfig({
       manifest: {
         name: 'SaidPrice',
         short_name: 'SaidPrice',
-        description: 'SaidPrice',
-        theme_color: '#0f3b45',
-        background_color: '#f5f7f8',
+        description: 'Spoken quotes, written on WhatsApp, followed up until someone says yes.',
+        theme_color: '#0c0c0d',
+        background_color: '#f6f6f4',
         display: 'standalone',
         start_url: '/',
         icons: [

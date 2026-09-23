@@ -92,6 +92,20 @@ export function formatMoney(cents: number | null | undefined, options: { currenc
   }).format(cents / 100)
 }
 
+/** "€" for EUR, "Lekë" for ALL in Albanian: the symbol shown next to a price field. */
+export function currencySymbol(code: string = currency) {
+  const part = new Intl.NumberFormat(tag(), { style: 'currency', currency: code }).formatToParts(0).find((p) => p.type === 'currency')
+  return part?.value ?? code
+}
+
+/** Parses what people type as a decimal: "1,5", "1.5", " 2 ". */
+export function parseDecimal(input: string | number | null | undefined): number | null {
+  if (input === null || input === undefined || input === '') return null
+  if (typeof input === 'number') return Number.isFinite(input) ? input : null
+  const n = Number(input.replace(/\s/g, '').replace(',', '.'))
+  return Number.isFinite(n) ? n : null
+}
+
 export function formatNumber(value: number | null | undefined, maximumFractionDigits = 1) {
   if (value === null || value === undefined || Number.isNaN(value)) return '—'
   return new Intl.NumberFormat(tag(), { maximumFractionDigits }).format(value)

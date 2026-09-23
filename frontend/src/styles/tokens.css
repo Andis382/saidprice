@@ -1,12 +1,13 @@
 /*
  * Design tokens. Screens use only these semantic names, never raw colours.
- * Each app re-skins itself by changing this file alone.
+ * SaidPrice: a tool brand, black and signal yellow like a good drill case,
+ * with emerald reserved for "accepted" and "won".
  */
 :root {
   /* Typography */
-  --font-display: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, monospace;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -16,68 +17,80 @@
   --text-2xl: 1.75rem;
   --text-3xl: 2.25rem;
 
-  /* Brand ramp */
-  --brand-50: #eefbf9;
-  --brand-100: #d5f4ef;
-  --brand-200: #ade8df;
-  --brand-300: #7cd4c9;
-  --brand-400: #4bb8ad;
-  --brand-500: #2a9c92;
-  --brand-600: #1f7e77;
-  --brand-700: #1c6561;
-  --brand-800: #1a514f;
-  --brand-900: #173f3e;
+  /* Brand ramp: signal yellow */
+  --brand-50: #fefce8;
+  --brand-100: #fef9c3;
+  --brand-200: #fef08a;
+  --brand-300: #fde047;
+  --brand-400: #facc15;
+  --brand-500: #eab308;
+  --brand-600: #ca8a04;
+  --brand-700: #a16207;
+  --brand-800: #854d0e;
+  --brand-900: #713f12;
 
-  --accent-400: #f5a54a;
-  --accent-500: #ec8a24;
-  --accent-600: #cf6d12;
+  /* Accent: emerald, for accepted and won */
+  --accent-400: #34d399;
+  --accent-500: #10b981;
+  --accent-600: #059669;
 
-  /* Neutrals (slightly cool) */
-  --gray-25: #fbfcfc;
-  --gray-50: #f5f7f8;
-  --gray-100: #eceff1;
-  --gray-200: #dde2e6;
-  --gray-300: #c3cad0;
-  --gray-400: #97a1aa;
-  --gray-500: #6c7781;
-  --gray-600: #525c66;
-  --gray-700: #3c444d;
-  --gray-800: #262c33;
-  --gray-900: #151a1f;
+  /* Neutrals: warm graphite */
+  --gray-25: #fcfcfb;
+  --gray-50: #f6f6f4;
+  --gray-100: #edede9;
+  --gray-200: #e1e1dc;
+  --gray-300: #c9c9c2;
+  --gray-400: #9d9d95;
+  --gray-500: #73736c;
+  --gray-600: #56564f;
+  --gray-700: #3c3c37;
+  --gray-800: #27272a;
+  --gray-900: #17171a;
 
   /* Semantic surfaces */
-  --bg: var(--gray-50);
+  --bg: #f6f6f4;
   --surface: #ffffff;
-  --surface-muted: var(--gray-50);
+  --surface-muted: #fafaf7;
   --surface-sunken: var(--gray-100);
-  --surface-hover: #f8fafa;
-  --border: rgb(21 26 31 / 0.08);
-  --border-strong: rgb(21 26 31 / 0.16);
+  --surface-hover: #fbfbf8;
+  --border: rgb(23 23 26 / 0.09);
+  --border-strong: rgb(23 23 26 / 0.17);
 
   --text: var(--gray-900);
   --text-muted: var(--gray-600);
   --text-subtle: var(--gray-500);
   --text-inverse: #ffffff;
-  --text-inverse-muted: rgb(255 255 255 / 0.72);
+  --text-inverse-muted: rgb(255 255 255 / 0.66);
 
-  --primary: var(--brand-600);
-  --primary-hover: var(--brand-700);
-  --primary-strong: var(--brand-800);
-  --primary-soft: var(--brand-50);
-  --primary-soft-border: var(--brand-100);
-  --primary-soft-text: var(--brand-700);
-  --on-primary: #ffffff;
+  /* Yellow never carries text on white: "primary" text and icons are dark amber,
+     primary buttons are yellow with ink-black labels. */
+  --primary: var(--brand-700);
+  --primary-hover: var(--brand-800);
+  --primary-strong: var(--gray-900);
+  --primary-soft: #fef8d4;
+  --primary-soft-border: #f5df76;
+  --primary-soft-text: #6b4c06;
+  --on-primary: #17171a;
+
+  --primary-fill-from: #fde047;
+  --primary-fill-to: #facc15;
+  --primary-fill-hover-to: #efbd0c;
+  --primary-edge: #d4a40b;
+  --primary-inner: inset 0 1px 0 rgb(255 255 255 / 0.6);
+  --primary-shadow: 0 1px 2px rgb(23 23 26 / 0.18), 0 6px 16px -6px rgb(202 138 4 / 0.7);
+  --primary-shadow-hover: 0 2px 4px rgb(23 23 26 / 0.18), 0 12px 24px -8px rgb(202 138 4 / 0.75);
+  --on-primary-shadow: 0 1px 0 rgb(255 255 255 / 0.4);
 
   --accent: var(--accent-500);
-  --accent-soft: #fff4e6;
-  --accent-soft-text: #9a4d06;
+  --accent-soft: #e6f7ef;
+  --accent-soft-text: #03664a;
 
-  --success: #16865a;
-  --success-soft: #e8f7ef;
-  --success-text: #0f6a46;
-  --warning: #c77700;
-  --warning-soft: #fff6e0;
-  --warning-text: #8a5100;
+  --success: #0e9a6a;
+  --success-soft: #e6f7ef;
+  --success-text: #04694b;
+  --warning: #c26a06;
+  --warning-soft: #fff4de;
+  --warning-text: #874703;
   --danger: #d23b3b;
   --danger-hover: #b52f2f;
   --danger-soft: #fdeceb;
@@ -86,23 +99,23 @@
   --info-soft: #eaf1fd;
   --info-text: #1f55ad;
 
-  --focus-ring: color-mix(in srgb, var(--brand-500) 38%, transparent);
+  --focus-ring: color-mix(in srgb, var(--brand-500) 55%, transparent);
 
-  /* The dark band at the top of every screen */
-  --header-from: #0d2f36;
-  --header-via: #10444c;
-  --header-to: #155e62;
+  /* The near-black band at the top of every screen */
+  --header-from: #0c0c0d;
+  --header-via: #17171a;
+  --header-to: #242428;
   --header-text: #ffffff;
-  --header-glow: rgb(124 212 201 / 0.28);
+  --header-glow: rgb(250 204 21 / 0.14);
+  --header-stripe: var(--brand-400);
 
   /* Elevation: a tight contact shadow plus a soft ambient one */
-  --shadow-xs: 0 1px 2px rgb(16 24 40 / 0.05);
-  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.1);
-  --shadow-md: 0 1px 2px rgb(16 24 40 / 0.05), 0 4px 10px -2px rgb(16 24 40 / 0.09);
-  --shadow-lg: 0 2px 4px -2px rgb(16 24 40 / 0.06), 0 12px 24px -6px rgb(16 24 40 / 0.14);
-  --shadow-xl: 0 4px 8px -4px rgb(16 24 40 / 0.06), 0 24px 48px -12px rgb(16 24 40 / 0.22);
-  --highlight: inset 0 1px 0 rgb(255 255 255 / 0.75);
-  --primary-shadow: 0 1px 2px rgb(16 24 40 / 0.14), 0 6px 16px -6px color-mix(in srgb, var(--brand-600) 75%, transparent);
+  --shadow-xs: 0 1px 2px rgb(23 23 26 / 0.05);
+  --shadow-sm: 0 1px 2px rgb(23 23 26 / 0.06), 0 1px 3px rgb(23 23 26 / 0.09);
+  --shadow-md: 0 1px 2px rgb(23 23 26 / 0.05), 0 4px 10px -2px rgb(23 23 26 / 0.09);
+  --shadow-lg: 0 2px 4px -2px rgb(23 23 26 / 0.06), 0 12px 24px -6px rgb(23 23 26 / 0.14);
+  --shadow-xl: 0 4px 8px -4px rgb(23 23 26 / 0.06), 0 24px 48px -12px rgb(23 23 26 / 0.24);
+  --highlight: inset 0 1px 0 rgb(255 255 255 / 0.8);
 
   /* Shape */
   --radius-xs: 6px;
@@ -118,7 +131,7 @@
 
   /* Layout */
   --tap: 48px;
-  --content-max: 1160px;
+  --content-max: 1240px;
   --gutter: clamp(16px, 3.5vw, 32px);
   --bottom-nav-h: 68px;
 }

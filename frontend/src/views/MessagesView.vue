@@ -13,31 +13,37 @@ import UiTextarea from '@/components/ui/UiTextarea.vue'
 import UiTabs from '@/components/ui/UiTabs.vue'
 import UiNotice from '@/components/ui/UiNotice.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
+import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { api } from '@/lib/api'
 import { useForm } from '@/lib/form'
 import { formatDateTime, formatPhone } from '@/lib/format'
+import type { OutboundMessage } from '@/lib/messages'
 import { useAuth } from '@/stores/auth'
+import { useOverview } from '@/stores/overview'
 
-export type OutboundMessage = {
-  id: number
-  recipient: string
-  recipientName: string | null
-  templateKey: string
-  body: string
-  status: 'QUEUED' | 'SENT' | 'DELIVERED' | 'READ' | 'FAILED' | 'SIMULATED'
-  error: string | null
-  createdAt: string
-  waMeUrl: string
-}
 type InboundMessage = { id: number; fromPhone: string; body: string | null; kind: string; handled: boolean; handledBy: string | null; receivedAt: string }
 
 const { t } = useI18n()
 const auth = useAuth()
+const overview = useOverview()
 const tab = ref<'out' | 'in'>('out')
 const outbox = ref<OutboundMessage[] | null>(null)
 const inbox = ref<InboundMessage[] | null>(null)
-const sim = useForm({ from: '', body: '' })
+const sim = useForm({ from: '', body: '', kind: 'text' as 'text' | 'audio' })
+const simKinds = computed(() => [
+  { value: 'text' as const, label: t('messages.simText') },
+  { value: 'audio' as const, label: t('messages.simVoice') },
+])
+const quickReplies = computed(() => t('messages.quickReplies').split(';').map((s) => s.trim()))
+
 const simReplies = ref<OutboundMessage[] | null>(null)
+
+function simKind(kind: 'text' | 'audio' | undefined) {
+  if (!kind) return
+  sim.data.kind = kind
+  // A voice note only becomes a draft when it comes from the business phone.
+  if (kind === 'audio' && auth.organization?.phone) sim.data.from = '+' + auth.organization.phone
+}
 
 const tabs = computed(() => [
   { value: 'out' as const, label: t('messages.outbox'), icon: PhPaperPlaneTilt, count: outbox.value?.length ?? null },
@@ -72,7 +78,7 @@ async function simulate() {
   if (res) {
     simReplies.value = res.replies
     sim.data.body = ''
-    await load()
+    await Promise.all([load(), overview.refresh()])
   }
 }
 </script>
@@ -127,16 +133,22 @@ async function simulate() {
 
       <UiCard v-if="auth.demo" :title="$t('messages.simulator')" :subtitle="$t('messages.simulatorHint')" :icon="PhRobot" tone="muted">
         <form class="stack" novalidate @submit.prevent="simulate">
-          <UiField id="f-from" :label="$t('messages.from')" :error="sim.error('from')">
-            <template #default="{ id, invalid }">
-              <UiInput :id="id" v-model="sim.data.from" type="tel" inputmode="tel" :invalid="invalid" />
+          <UiSegmented :model-value="sim.data.kind" :options="simKinds" :label="$t('messages.simKind')" block @update:model-value="simKind" />
+          <UiField id="f-from" :label="$t('messages.from')" :hint="sim.data.kind === 'audio' ? $t('messages.simVoiceHint') : undefined" :error="sim.error('from')">
+            <template #default="{ id, invalid, describedby }">
+              <UiInput :id="id" v-model="sim.data.from" type="tel" inputmode="tel" :invalid="invalid" :describedby="describedby" />
             </template>
           </UiField>
-          <UiField id="f-body" :label="$t('messages.body')" :error="sim.error('body')">
-            <template #default="{ id, invalid }">
-              <UiTextarea :id="id" v-model="sim.data.body" :rows="2" :invalid="invalid" />
-            </template>
-          </UiField>
+          <template v-if="sim.data.kind === 'text'">
+            <UiField id="f-body" :label="$t('messages.body')" :error="sim.error('body')">
+              <template #default="{ id, invalid }">
+                <UiTextarea :id="id" v-model="sim.data.body" :rows="2" :invalid="invalid" />
+              </template>
+            </UiField>
+            <div class="quick" role="group" :aria-label="$t('messages.quickLabel')">
+              <button v-for="q in quickReplies" :key="q" type="button" class="quick__chip" @click="sim.data.body = q">{{ q }}</button>
+            </div>
+          </template>
           <UiButton type="submit" :icon="PhPaperPlaneTilt" :loading="sim.processing.value">{{ $t('messages.simulate') }}</UiButton>
           <div v-if="simReplies" class="stack stack-sm">
             <p v-for="r in simReplies" :key="r.id" class="bubble">{{ r.body }}</p>
@@ -155,6 +167,29 @@ async function simulate() {
 }
 .layout--demo {
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+}
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: -6px;
+}
+.quick__chip {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+.quick__chip:hover {
+  color: var(--text);
+}
+.quick__chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 @media (max-width: 900px) {
   .layout--demo {

@@ -120,25 +120,25 @@ const isButton = computed(() => !props.to && !props.href)
 /* Primary: gradient body, inner highlight, coloured shadow, lifts on hover */
 .btn--primary {
   color: var(--on-primary);
-  background: linear-gradient(180deg, var(--brand-500) 0%, var(--brand-600) 100%);
-  border-color: var(--brand-700);
+  font-weight: 700;
+  background: linear-gradient(180deg, var(--primary-fill-from) 0%, var(--primary-fill-to) 100%);
+  border-color: var(--primary-edge);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    var(--primary-inner),
     var(--primary-shadow);
-  text-shadow: 0 1px 0 rgb(0 0 0 / 0.12);
+  text-shadow: var(--on-primary-shadow);
 }
 .btn--primary:hover:not(:disabled) {
   color: var(--on-primary);
-  background: linear-gradient(180deg, var(--brand-500) 0%, var(--brand-700) 100%);
+  background: linear-gradient(180deg, var(--primary-fill-from) 0%, var(--primary-fill-hover-to) 100%);
   transform: translateY(-1px);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
-    0 2px 4px rgb(16 24 40 / 0.14),
-    0 10px 22px -8px color-mix(in srgb, var(--brand-600) 80%, transparent);
+    var(--primary-inner),
+    var(--primary-shadow-hover);
 }
 .btn--primary:focus-visible {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    var(--primary-inner),
     var(--primary-shadow),
     0 0 0 4px var(--focus-ring);
 }

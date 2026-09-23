@@ -42,6 +42,7 @@ import AuthAside from '@/components/AuthAside.vue'
     radial-gradient(700px 420px at 0% 0%, var(--header-glow), transparent 60%),
     radial-gradient(600px 400px at 100% 100%, rgb(255 255 255 / 0.06), transparent 60%),
     linear-gradient(150deg, var(--header-from), var(--header-via) 55%, var(--header-to));
+  border-top: 3px solid var(--header-stripe);
   overflow: hidden;
   isolation: isolate;
 }

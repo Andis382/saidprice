@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, ref, useId, watch } from 'vue'
 import { PhX } from '@phosphor-icons/vue'
 
 /**
@@ -15,6 +15,7 @@ withDefaults(defineProps<{ title: string; description?: string; size?: 'sm' | 'm
 
 const emit = defineEmits<{ close: [] }>()
 const el = ref<HTMLDialogElement | null>(null)
+const titleId = `dialog-title-${useId()}`
 
 watch(
   open,
@@ -39,11 +40,11 @@ function onBackdrop(e: MouseEvent) {
 </script>
 
 <template>
-  <dialog ref="el" class="dialog" :class="`dialog--${size}`" :aria-labelledby="'dlg-title'" @close="onClose" @cancel.prevent="onClose" @click="onBackdrop">
+  <dialog ref="el" class="dialog" :class="`dialog--${size}`" :aria-labelledby="titleId" @close="onClose" @cancel.prevent="onClose" @click="onBackdrop">
     <div class="dialog__panel">
       <header class="dialog__header">
         <div>
-          <h2 id="dlg-title" class="dialog__title">{{ title }}</h2>
+          <h2 :id="titleId" class="dialog__title">{{ title }}</h2>
           <p v-if="description" class="dialog__desc">{{ description }}</p>
         </div>
         <button type="button" class="dialog__close" :aria-label="$t('common.close')" @click="onClose">

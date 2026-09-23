@@ -38,6 +38,7 @@ withDefaults(defineProps<{ business?: string | null; subtitle?: string | null }>
   background:
     radial-gradient(700px 300px at 10% -20%, var(--header-glow), transparent 65%),
     linear-gradient(120deg, var(--header-from), var(--header-via) 55%, var(--header-to));
+  border-top: 3px solid var(--header-stripe);
 }
 .public__bar {
   display: flex;

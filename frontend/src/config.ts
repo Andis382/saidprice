@@ -5,4 +5,4 @@ export const DEMO = {
 }
 
 /** Roles an owner can hand out with a join link. */
-export const INVITE_ROLES: string[] = ['MEMBER']
+export const INVITE_ROLES: string[] = ['ASSISTANT']

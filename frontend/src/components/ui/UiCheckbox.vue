@@ -60,9 +60,9 @@ withDefaults(defineProps<{ id?: string; label?: string; hint?: string; disabled?
   border-color: var(--primary);
 }
 .check__native:checked + .check__box {
-  color: #fff;
-  background: linear-gradient(180deg, var(--brand-500), var(--brand-600));
-  border-color: var(--brand-700);
+  color: var(--on-primary);
+  background: linear-gradient(180deg, var(--primary-fill-from), var(--primary-fill-to));
+  border-color: var(--primary-edge);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 2px 6px -2px var(--focus-ring);
 }
 .check__native:focus-visible + .check__box {
