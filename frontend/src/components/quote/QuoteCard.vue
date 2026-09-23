@@ -1,12 +1,27 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
-import { PhBellRinging, PhChatCircleText, PhCheckCircle, PhEye, PhMicrophone, PhWhatsappLogo, PhXCircle } from '@phosphor-icons/vue'
+import { PhBellRinging, PhChatCircleText, PhCheckCircle, PhEye, PhMicrophone, PhTrendDown, PhWhatsappLogo, PhXCircle } from '@phosphor-icons/vue'
+import UiMenu, { type MenuItem } from '@/components/ui/UiMenu.vue'
 import { formatAge, formatMoney, formatRelative } from '@/lib/format'
-import type { QuoteSummary } from '@/lib/quote'
+import type { Outcome, QuoteSummary } from '@/lib/quote'
 
-/** One quote on the board: who, what, how much, and what is going on with it. */
-const props = withDefaults(defineProps<{ quote: QuoteSummary; heading?: 'customer' | 'number' }>(), { heading: 'customer' })
+/**
+ * One quote on the board: who, what, how much, and what is going on with it. With
+ * `actions`, a small menu marks it won or lost without opening it.
+ */
+const props = withDefaults(defineProps<{ quote: QuoteSummary; heading?: 'customer' | 'number'; actions?: boolean }>(), { heading: 'customer' })
+const emit = defineEmits<{ outcome: [outcome: Outcome] }>()
+const { t } = useI18n()
+
+const menu = computed<MenuItem[]>(() => {
+  if (!props.actions || props.quote.status === 'DRAFT') return []
+  const items: MenuItem[] = []
+  if (props.quote.outcome !== 'WON') items.push({ label: t('detail.markWon'), icon: PhCheckCircle, action: () => emit('outcome', 'WON') })
+  if (props.quote.outcome !== 'LOST') items.push({ label: t('detail.markLost'), icon: PhTrendDown, action: () => emit('outcome', 'LOST') })
+  return items
+})
 
 const when = computed(() => {
   const q = props.quote
@@ -17,68 +32,99 @@ const when = computed(() => {
 </script>
 
 <template>
-  <RouterLink :to="{ name: 'quote', params: { id: quote.id } }" class="qcard" :class="[`qcard--${quote.status.toLowerCase()}`, { 'qcard--question': quote.hasQuestion }]">
-    <div class="qcard__top">
-      <span v-if="heading === 'number'" class="qcard__who num">{{ quote.number }}</span>
-      <span v-else class="qcard__who truncate">
-        {{ quote.customer?.name ?? (quote.source === 'WHATSAPP' ? $t('quotes.fromWhatsApp') : $t('quotes.noCustomer')) }}
-      </span>
-      <time class="qcard__when num" :datetime="when ?? undefined" :title="formatRelative(when)">{{ formatAge(when) }}</time>
-    </div>
-    <p class="qcard__title">{{ quote.title ?? (quote.source === 'WHATSAPP' ? $t('quotes.voiceNoteWaiting') : $t('quotes.untitled')) }}</p>
-    <div class="qcard__foot">
-      <span class="qcard__total num">{{ formatMoney(quote.totalCents) }}</span>
-      <span class="qcard__signals">
-        <span v-if="quote.hasQuestion" class="sig sig--question" :title="$t('quotes.signals.question')">
-          <PhChatCircleText :size="15" weight="fill" aria-hidden="true" />
-          <span class="visually-hidden">{{ $t('quotes.signals.question') }}</span>
+  <article class="qcard" :class="[`qcard--${quote.status.toLowerCase()}`, { 'qcard--question': quote.hasQuestion, 'qcard--menu': menu.length }]">
+    <RouterLink :to="{ name: 'quote', params: { id: quote.id } }" class="qcard__link">
+      <div class="qcard__top">
+        <span v-if="heading === 'number'" class="qcard__who num">{{ quote.number }}</span>
+        <span v-else class="qcard__who truncate">
+          {{ quote.customer?.name ?? (quote.source === 'WHATSAPP' ? $t('quotes.fromWhatsApp') : $t('quotes.noCustomer')) }}
         </span>
-        <span v-if="quote.pendingNudge" class="sig sig--nudge" :title="$t('quotes.signals.followUpReady')">
-          <PhBellRinging :size="15" weight="fill" aria-hidden="true" />
-          <span class="visually-hidden">{{ $t('quotes.signals.followUpReady') }}</span>
+        <time class="qcard__when num" :datetime="when ?? undefined" :title="formatRelative(when)">{{ formatAge(when) }}</time>
+      </div>
+      <p class="qcard__title">{{ quote.title ?? (quote.source === 'WHATSAPP' ? $t('quotes.voiceNoteWaiting') : $t('quotes.untitled')) }}</p>
+      <div class="qcard__foot">
+        <span class="qcard__total num">{{ formatMoney(quote.totalCents) }}</span>
+        <span class="qcard__signals">
+          <span v-if="quote.hasQuestion" class="sig sig--question" :title="$t('quotes.signals.question')">
+            <PhChatCircleText :size="15" weight="fill" aria-hidden="true" />
+            <span class="visually-hidden">{{ $t('quotes.signals.question') }}</span>
+          </span>
+          <span v-if="quote.pendingNudge" class="sig sig--nudge" :title="$t('quotes.signals.followUpReady')">
+            <PhBellRinging :size="15" weight="fill" aria-hidden="true" />
+            <span class="visually-hidden">{{ $t('quotes.signals.followUpReady') }}</span>
+          </span>
+          <span v-else-if="quote.nudgeCount" class="sig" :title="$t('quotes.signals.nudged', { n: quote.nudgeCount })">
+            <PhBellRinging :size="15" aria-hidden="true" /><span class="num">{{ quote.nudgeCount }}</span>
+          </span>
+          <span v-if="quote.viewedAt && (quote.status === 'SENT' || quote.status === 'VIEWED')" class="sig" :title="$t('quotes.signals.viewed')">
+            <PhEye :size="15" aria-hidden="true" />
+            <span class="visually-hidden">{{ $t('quotes.signals.viewed') }}</span>
+          </span>
+          <span v-if="quote.source === 'WHATSAPP'" class="sig" :title="$t('quotes.signals.whatsapp')">
+            <PhWhatsappLogo :size="15" aria-hidden="true" />
+          </span>
+          <span v-else-if="quote.hasVoice" class="sig" :title="$t('quotes.signals.voice')">
+            <PhMicrophone :size="15" aria-hidden="true" />
+            <span class="visually-hidden">{{ $t('quotes.signals.voice') }}</span>
+          </span>
         </span>
-        <span v-else-if="quote.nudgeCount" class="sig" :title="$t('quotes.signals.nudged', { n: quote.nudgeCount })">
-          <PhBellRinging :size="15" aria-hidden="true" /><span class="num">{{ quote.nudgeCount }}</span>
-        </span>
-        <span v-if="quote.viewedAt && (quote.status === 'SENT' || quote.status === 'VIEWED')" class="sig" :title="$t('quotes.signals.viewed')">
-          <PhEye :size="15" aria-hidden="true" />
-          <span class="visually-hidden">{{ $t('quotes.signals.viewed') }}</span>
-        </span>
-        <span v-if="quote.source === 'WHATSAPP'" class="sig" :title="$t('quotes.signals.whatsapp')">
-          <PhWhatsappLogo :size="15" aria-hidden="true" />
-        </span>
-        <span v-else-if="quote.hasVoice" class="sig" :title="$t('quotes.signals.voice')">
-          <PhMicrophone :size="15" aria-hidden="true" />
-          <span class="visually-hidden">{{ $t('quotes.signals.voice') }}</span>
-        </span>
-      </span>
-    </div>
+      </div>
+    </RouterLink>
     <span v-if="quote.outcome" class="qcard__outcome" :class="`qcard__outcome--${quote.outcome.toLowerCase()}`">
       <component :is="quote.outcome === 'WON' ? PhCheckCircle : PhXCircle" :size="13" weight="fill" aria-hidden="true" />
       {{ $t(`outcome.${quote.outcome}`) }}
     </span>
     <span v-else-if="quote.status === 'EXPIRED'" class="qcard__outcome">{{ $t('status.EXPIRED') }}</span>
-  </RouterLink>
+    <div v-if="menu.length" class="qcard__menu">
+      <UiMenu :items="menu" :label="$t('quotes.cardMenu', { number: quote.number })" />
+    </div>
+  </article>
 </template>
 
 <style scoped>
 .qcard {
   --edge: var(--gray-300);
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px 12px 16px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm), var(--highlight);
-  color: var(--text);
-  text-decoration: none;
   transition:
     transform var(--duration) var(--ease),
     box-shadow var(--duration) var(--ease),
     border-color var(--duration) var(--ease);
+}
+/* an open menu must float over the cards below */
+.qcard:focus-within {
+  z-index: 5;
+}
+.qcard__link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px 12px 16px;
+  border-radius: inherit;
+  color: var(--text);
+  text-decoration: none;
+}
+.qcard__link:hover {
+  color: var(--text);
+}
+.qcard__link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+.qcard--menu .qcard__foot {
+  padding-right: 28px;
+}
+.qcard__menu {
+  position: absolute;
+  right: 4px;
+  bottom: 5px;
+}
+.qcard__menu :deep(.menu__trigger) {
+  width: 30px;
+  height: 30px;
 }
 .qcard::before {
   /* status edge */
@@ -108,14 +154,9 @@ const when = computed(() => {
   background: linear-gradient(180deg, var(--warning-soft), var(--surface) 60%);
 }
 .qcard:hover {
-  color: var(--text);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg), var(--highlight);
   border-color: var(--border-strong);
-}
-.qcard:focus-visible {
-  outline: none;
-  box-shadow: var(--shadow-md), 0 0 0 4px var(--focus-ring);
 }
 .qcard__top {
   display: flex;

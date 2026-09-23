@@ -192,6 +192,7 @@ const en = {
       SILENT: 'Nobody went quiet',
     },
     showingLatest: 'Showing the latest {n} of {total}',
+    cardMenu: 'Actions for {number}',
     fromWhatsApp: 'From WhatsApp',
     noCustomer: 'No customer yet',
     voiceNoteWaiting: 'Voice note waiting for its words',

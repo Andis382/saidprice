@@ -9,10 +9,11 @@ import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiSearch from '@/components/ui/UiSearch.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import UiTabs from '@/components/ui/UiTabs.vue'
+import OutcomeDialog from '@/components/quote/OutcomeDialog.vue'
 import QuoteCard from '@/components/quote/QuoteCard.vue'
 import { api, query } from '@/lib/api'
 import { formatMoney } from '@/lib/format'
-import { BOARD_COLUMNS, type BoardColumn, type QuoteSummary } from '@/lib/quote'
+import { BOARD_COLUMNS, type BoardColumn, type Outcome, type QuoteSummary } from '@/lib/quote'
 import { useOverview } from '@/stores/overview'
 
 type Column = { key: BoardColumn; count: number; totalCents: number; quotes: QuoteSummary[] }
@@ -58,6 +59,21 @@ watch(search, () => {
     load()
   }, 250)
 })
+const marking = ref<QuoteSummary | null>(null)
+const markAs = ref<Outcome>('WON')
+const markOpen = ref(false)
+
+function mark(quote: QuoteSummary, outcome: Outcome) {
+  marking.value = quote
+  markAs.value = outcome
+  markOpen.value = true
+}
+
+function afterMark() {
+  load()
+  overview.refresh()
+}
+
 function pick(value: BoardColumn) {
   tab.value = value
   router.replace({ query: { ...route.query, tab: value } })
@@ -100,7 +116,7 @@ onMounted(load)
           </header>
           <p class="col__value num">{{ formatMoney(c.totalCents) }}</p>
           <div class="col__cards">
-            <QuoteCard v-for="q in c.quotes" :key="q.id" :quote="q" />
+            <QuoteCard v-for="q in c.quotes" :key="q.id" :quote="q" actions @outcome="(o) => mark(q, o)" />
             <p v-if="!c.quotes.length" class="col__empty">{{ $t(`quotes.emptyColumn.${c.key}`) }}</p>
             <p v-if="c.count > c.quotes.length" class="col__more">{{ $t('quotes.showingLatest', { n: c.quotes.length, total: c.count }) }}</p>
           </div>
@@ -115,11 +131,13 @@ onMounted(load)
           <span class="num strong">{{ formatMoney(active.totalCents) }}</span>
         </div>
         <div class="stacked__cards">
-          <QuoteCard v-for="q in active?.quotes ?? []" :key="q.id" :quote="q" />
+          <QuoteCard v-for="q in active?.quotes ?? []" :key="q.id" :quote="q" actions @outcome="(o) => mark(q, o)" />
           <UiEmpty v-if="active && !active.quotes.length" compact :icon="PhPencilSimpleLine" :title="$t(`quotes.emptyColumn.${active.key}`)" />
         </div>
       </div>
     </template>
+
+    <OutcomeDialog v-model:open="markOpen" :quote="marking" :outcome="markAs" @done="afterMark" />
   </AppPage>
 </template>
 

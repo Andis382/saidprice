@@ -194,6 +194,7 @@ const sq: MessageSchema = {
       SILENT: 'Askush nuk heshti',
     },
     showingLatest: 'Po shfaqen {n} më të rejat nga {total}',
+    cardMenu: 'Veprime për {number}',
     fromWhatsApp: 'Nga WhatsApp',
     noCustomer: 'Ende pa klient',
     voiceNoteWaiting: 'Mesazh zanor që pret fjalët',
