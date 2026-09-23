@@ -74,7 +74,7 @@ onMounted(load)
 
       <UiCard :title="$t('customers.history')" :icon="PhNotepad">
         <div v-if="customer.quotes.length" class="quotes">
-          <QuoteCard v-for="q in customer.quotes" :key="q.id" :quote="q" />
+          <QuoteCard v-for="q in customer.quotes" :key="q.id" :quote="q" heading="number" />
         </div>
         <UiEmpty v-else compact :icon="PhNotepad" :title="$t('customers.noQuotes')">
           <UiButton :icon="PhMicrophone" :loading="starting" @click="newQuote">{{ $t('customers.newQuote') }}</UiButton>

@@ -65,7 +65,8 @@ async function dismiss() {
           <RouterLink :to="{ name: 'quote', params: { id: nudge.quote.id } }" class="nudge__number">{{ nudge.quote.number }}</RouterLink>
         </p>
         <p class="nudge__job">
-          {{ nudge.quote.title }} · <span class="num strong">{{ formatMoney(nudge.quote.totalCents) }}</span>
+          <span class="nudge__title">{{ nudge.quote.title }}</span>
+          <span class="nudge__price num">{{ formatMoney(nudge.quote.totalCents) }}</span>
         </p>
       </div>
       <UiBadge :tone="nudge.sequence === 1 ? 'primary' : 'warning'" size="sm">{{ $t(nudge.sequence === 1 ? 'followUps.first' : 'followUps.second') }}</UiBadge>
@@ -133,11 +134,28 @@ async function dismiss() {
   text-decoration: underline;
 }
 .nudge__job {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
   font-size: var(--text-sm);
   color: var(--text-muted);
+}
+.nudge__title {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.nudge__price {
+  flex: none;
+  font-weight: 700;
+  color: var(--text);
+}
+.nudge__price::before {
+  content: '·';
+  margin-right: 6px;
+  color: var(--text-subtle);
+  font-weight: 400;
 }
 .nudge__facts {
   display: flex;

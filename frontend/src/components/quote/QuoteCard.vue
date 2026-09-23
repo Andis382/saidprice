@@ -6,7 +6,7 @@ import { formatAge, formatMoney, formatRelative } from '@/lib/format'
 import type { QuoteSummary } from '@/lib/quote'
 
 /** One quote on the board: who, what, how much, and what is going on with it. */
-const props = defineProps<{ quote: QuoteSummary }>()
+const props = withDefaults(defineProps<{ quote: QuoteSummary; heading?: 'customer' | 'number' }>(), { heading: 'customer' })
 
 const when = computed(() => {
   const q = props.quote
@@ -19,7 +19,8 @@ const when = computed(() => {
 <template>
   <RouterLink :to="{ name: 'quote', params: { id: quote.id } }" class="qcard" :class="[`qcard--${quote.status.toLowerCase()}`, { 'qcard--question': quote.hasQuestion }]">
     <div class="qcard__top">
-      <span class="qcard__who truncate">
+      <span v-if="heading === 'number'" class="qcard__who num">{{ quote.number }}</span>
+      <span v-else class="qcard__who truncate">
         {{ quote.customer?.name ?? (quote.source === 'WHATSAPP' ? $t('quotes.fromWhatsApp') : $t('quotes.noCustomer')) }}
       </span>
       <time class="qcard__when num" :datetime="when ?? undefined" :title="formatRelative(when)">{{ formatAge(when) }}</time>

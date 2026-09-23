@@ -244,8 +244,9 @@ async function simulate() {
   padding: 10px 12px;
   font-size: var(--text-sm);
   white-space: pre-wrap;
-  background: #dcf8c6;
-  color: #1f2c1a;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--text);
   border-radius: var(--radius) 4px var(--radius) var(--radius);
   box-shadow: var(--shadow-xs);
 }

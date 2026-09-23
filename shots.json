@@ -2,17 +2,18 @@
   "email": "demo@saidprice.test",
   "password": "demo1234",
   "pages": [
-    {
-      "name": "quote-detail",
-      "path": "/quotes/84",
-      "wait": 900,
-      "fullPage": true
-    },
-    {
-      "name": "follow-ups",
-      "path": "/follow-ups",
-      "wait": 900,
-      "fullPage": true
-    }
+    { "name": "login", "path": "/login", "auth": false },
+    { "name": "pipeline", "path": "/quotes", "wait": 900 },
+    { "name": "new-quote", "path": "/quotes/new" },
+    { "name": "editor", "path": "/quotes/88/edit?from=capture", "wait": 900 },
+    { "name": "quote-detail", "path": "/quotes/84", "wait": 900 },
+    { "name": "follow-ups", "path": "/follow-ups", "wait": 900 },
+    { "name": "stats", "path": "/stats", "wait": 900 },
+    { "name": "customers", "path": "/customers" },
+    { "name": "customer", "path": "/customers/53" },
+    { "name": "public-quote", "path": "/q/demo-kitchen-tap", "auth": false, "wait": 900 },
+    { "name": "public-accepted", "path": "/q/qw-oMVaL9N9XMdFbMcaKUw", "auth": false, "wait": 900 },
+    { "name": "messages", "path": "/messages" },
+    { "name": "settings", "path": "/settings" }
   ]
 }
