@@ -47,6 +47,9 @@ export function month(p: DateParts): string {
   return `${MONTHS[p.month]} ${p.year}`
 }
 
+/** Keeps "145 €" and "12 345" on one line. */
+const NBSP = ' '
+
 /** 1250.5 -> "1250,50"; groups of three with a space from 10 000 up, as Albanian writes them. */
 export function number(value: number, minFraction: number, maxFraction: number): string {
   const negative = value < 0
@@ -54,12 +57,12 @@ export function number(value: number, minFraction: number, maxFraction: number):
   let [whole = '0', fraction = ''] = fixed.split('.')
   fraction = fraction.replace(/0+$/, '')
   while (fraction.length < minFraction) fraction += '0'
-  if (whole.length > 4) whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  if (whole.length > 4) whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, NBSP)
   return (negative ? '-' : '') + whole + (fraction ? ',' + fraction : '')
 }
 
 export function money(units: number, currency: string, decimals: boolean): string {
-  return `${number(units, decimals ? 2 : 0, decimals ? 2 : 0)} ${CURRENCY_SYMBOLS[currency] ?? currency}`
+  return `${number(units, decimals ? 2 : 0, decimals ? 2 : 0)}${NBSP}${CURRENCY_SYMBOLS[currency] ?? currency}`
 }
 
 export function currencySymbol(currency: string): string {

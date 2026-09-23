@@ -69,6 +69,17 @@ class QuoteCaptureTest extends TestCase
         $this->assertNotSame($namesake->id, Quote::latest('id')->first()->customer_id);
     }
 
+    public function test_a_customer_known_only_by_number_gets_the_name_said_later(): void
+    {
+        $owner = $this->owner();
+        $known = $this->customerOf($owner, ['name' => '+355692345678', 'phone' => '355692345678']);
+
+        $this->actingAs($owner)->postJson('/api/quotes', ['transcript' => self::SPOKEN])
+            ->assertCreated()
+            ->assertJsonPath('customer.id', $known->id)
+            ->assertJsonPath('customer.name', 'Znj. Hoxha');
+    }
+
     public function test_typed_and_blank_drafts_and_one_for_a_known_customer(): void
     {
         $owner = $this->owner();

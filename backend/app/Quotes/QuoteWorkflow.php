@@ -161,8 +161,14 @@ class QuoteWorkflow
         $errors = [];
         if (! $quote->customer) {
             $errors['customer.name'] = [__('quotes.needs_customer')];
-        } elseif (! $quote->customer->phone) {
-            $errors['customer.phone'] = [__('quotes.needs_customer_phone')];
+        } else {
+            // A customer added from a number alone is named after it; a greeting needs a name.
+            if (! preg_match('/\p{L}/u', $quote->customer->name)) {
+                $errors['customer.name'] = [__('quotes.needs_customer_name')];
+            }
+            if (! $quote->customer->phone) {
+                $errors['customer.phone'] = [__('quotes.needs_customer_phone')];
+            }
         }
         if ($quote->items()->count() === 0 || $quote->total_cents <= 0) {
             $errors['items'] = [__('quotes.needs_items')];

@@ -3,20 +3,14 @@
   "password": "demo1234",
   "pages": [
     {
-      "name": "editor",
-      "path": "/quotes/88/edit?from=capture",
-      "wait": 900,
-      "fullPage": true
-    },
-    {
       "name": "quote-detail",
       "path": "/quotes/84",
       "wait": 900,
       "fullPage": true
     },
     {
-      "name": "stats",
-      "path": "/stats",
+      "name": "follow-ups",
+      "path": "/follow-ups",
       "wait": 900,
       "fullPage": true
     }

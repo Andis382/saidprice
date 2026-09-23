@@ -144,14 +144,15 @@ final class Vocabulary
         return isset($all[$key]);
     }
 
-    /** Albanian or English, from the words used; the hint breaks a tie. */
+    /**
+     * Albanian or English, from the words used; the hint breaks a tie. Words with ë or ç count
+     * for Albanian but do not decide alone: an English sentence can name "Rruga e Kavajës".
+     */
     public static function detectLocale(string $text, string $hint): string
     {
-        if (preg_match('/[ëçËÇ]/u', $text)) {
-            return 'sq';
-        }
-        $words = array_map(fn ($w) => Token::keyOf($w), preg_split('/[^\p{L}]+/u', $text) ?: []);
-        $sq = count(array_intersect($words, self::SQ_MARKERS));
+        $raw = preg_split('/[^\p{L}]+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $words = array_map(fn ($w) => Token::keyOf($w), $raw);
+        $sq = count(array_intersect($words, self::SQ_MARKERS)) + count(preg_grep('/[ëçËÇ]/u', $raw));
         $en = count(array_intersect($words, self::EN_MARKERS));
         if ($sq === $en) {
             return $hint === 'en' ? 'en' : 'sq';

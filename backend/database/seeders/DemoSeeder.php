@@ -149,7 +149,7 @@ class DemoSeeder extends Seeder
         }
         $plan[] = [$this->local('-3 days 11:20'), 'quiet'];
         $plan[] = [$this->local('yesterday 09:10'), 'hoxha'];
-        $plan[] = [$this->local('yesterday 14:30'), 'regular'];
+        $plan[] = [$this->local('yesterday 14:30'), 'quickYes'];
         $plan[] = [$this->local('yesterday 17:45'), 'typedDraft'];
         $plan[] = [$this->recent('07:20', 'yesterday 18:50'), 'whatsAppVoiceNote'];
         $plan[] = [$this->recent('08:05', 'yesterday 19:05'), 'freshVoiceDraft'];
@@ -346,6 +346,17 @@ class DemoSeeder extends Seeder
         $sentAt = $createdAt->addMinutes(6);
         $this->at($sentAt, fn () => $this->workflow->send($quote, $this->owner));
         $this->live($quote, $sentAt->addMinutes(35), null, null);
+    }
+
+    /** Opened within minutes and accepted on the link the same afternoon. */
+    private function quickYes(CarbonImmutable $createdAt): void
+    {
+        $customer = $this->customer('Arta Kola', 'sq', 'Rruga Sami Frashëri 41, ap. 9');
+        $quote = $this->draft($customer, DemoCatalog::JOBS[8], $createdAt, $this->owner, voice: true, when: 'Të premten në mëngjes');
+        $sentAt = $createdAt->addMinutes(4);
+        $this->at($sentAt, fn () => $this->workflow->send($quote, $this->owner));
+        $this->at($sentAt->addMinutes(18), fn () => $this->workflow->viewed($quote));
+        $this->at($sentAt->addMinutes(95), fn () => $this->workflow->accept($quote, QuoteEvent::VIA_LINK, 'Dakord, ju pres të premten.'));
     }
 
     private function typedDraft(CarbonImmutable $createdAt): void

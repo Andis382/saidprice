@@ -12,6 +12,7 @@ return [
     'not_editable' => 'Kjo ofertë ka marrë përgjigje, ndaj mbetet siç është. Bëni një kopje për një ofertë të re.',
     'needs_customer' => 'Zgjidhni ose shtoni fillimisht klientin.',
     'needs_customer_phone' => 'Shtoni numrin e telefonit të klientit që oferta t’i shkojë.',
+    'needs_customer_name' => 'Shtoni emrin e klientit që mesazhi ta përshëndesë.',
     'needs_items' => 'Shtoni të paktën një rresht me çmim.',
     'not_answerable' => 'Kjo ofertë nuk mund të marrë më përgjigje këtu.',
     'only_drafts_deleted' => 'Fshihen vetëm draftet. Shënojeni këtë si të humbur.',

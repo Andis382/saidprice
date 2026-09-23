@@ -105,7 +105,7 @@ final class QuoteParser
             if ($token->used || (! $title && ! $byPreposition) || ($token->key === 'z' && ! str_starts_with($token->text, 'Z'))) {
                 continue;
             }
-            $words = $this->nameWords($tokens, $i + 1, $capitalised ? 3 : 1, $capitalised);
+            $words = $this->nameWords($tokens, $i + 1, $capitalised ? 3 : 1, $capitalised, $title !== null);
             if ($words === []) {
                 continue;
             }
@@ -135,11 +135,19 @@ final class QuoteParser
      * @param  list<Token>  $tokens
      * @return list<Token>
      */
-    private function nameWords(array $tokens, int $from, int $max, bool $capitalised): array
+    private function nameWords(array $tokens, int $from, int $max, bool $capitalised, bool $afterTitle): array
     {
         $taken = [];
-        for ($j = $from; $j < count($tokens) && count($taken) < $max && $this->isNameWord($tokens[$j], $capitalised); $j++) {
-            $taken[] = $tokens[$j];
+        for ($j = $from; $j < count($tokens) && count($taken) < $max; $j++) {
+            $t = $tokens[$j];
+            // Right after a title a capitalised word is a surname even when it is also a
+            // word we listen for ("Mr Test", "Znj. Pastrim"), unless it opens an address.
+            $surname = $afterTitle && $taken === [] && $capitalised && ! $t->used && $t->isWord() && $t->isCapitalised()
+                && ! in_array($t->key, Vocabulary::STREETS, true) && ! isset(Vocabulary::TITLES[$t->key]);
+            if (! $surname && ! $this->isNameWord($t, $capitalised)) {
+                break;
+            }
+            $taken[] = $t;
         }
 
         return $taken;

@@ -173,7 +173,7 @@ const sq: MessageSchema = {
     total: 'Totali',
     notes: 'Shënime',
     terms: 'Kushtet',
-    dated: 'Shkruar më {date}',
+    dated: 'Shkruar: {date}',
     noLines: 'Ende asnjë rresht.',
   },
   quotes: {

@@ -12,6 +12,7 @@ return [
     'not_editable' => 'This quote has been answered, so it stays as it is. Duplicate it to make a new one.',
     'needs_customer' => 'Choose or add the customer first.',
     'needs_customer_phone' => 'Add the customer’s phone number so the quote can reach them.',
+    'needs_customer_name' => 'Add the customer’s name so the message can greet them.',
     'needs_items' => 'Add at least one line with a price.',
     'not_answerable' => 'This quote can no longer be answered here.',
     'only_drafts_deleted' => 'Only drafts can be deleted. Mark this one as lost instead.',

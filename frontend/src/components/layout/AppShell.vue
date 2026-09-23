@@ -199,14 +199,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
     linear-gradient(118deg, var(--header-from) 0%, var(--header-via) 55%, var(--header-to) 100%);
   border-top: 3px solid var(--header-stripe);
   padding-bottom: 64px;
-  isolation: isolate;
 }
 .band::before {
   /* fine grid, like the ruled plate on a tool case */
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -1;
+  pointer-events: none;
   background-image:
     linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
@@ -222,11 +221,21 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   height: 1px;
   background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.16), transparent);
 }
+/*
+ * The page content overlaps the band's lower edge, so it paints over the band. The bar and
+ * the title area sit one level higher, so their menus open over the content, not under it.
+ */
+.band__bar,
+.band__hero {
+  position: relative;
+  z-index: 2;
+}
 .band__bar {
   display: flex;
   align-items: center;
   gap: 20px;
   min-height: 68px;
+  z-index: 3;
 }
 .band__brand {
   display: inline-flex;

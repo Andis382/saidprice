@@ -126,6 +126,14 @@ class QuoteParserTest extends TestCase
         $this->assertItems([['Replace bathroom tap', 1, null, 12000, ItemKind::Other]], $q);
     }
 
+    public function test_a_surname_that_is_also_a_keyword_still_follows_a_title(): void
+    {
+        $q = $this->parser->parse('Mr Test Kola, 068 555 1234, replace bathroom tap, 38 parts, 30 labour, for Monday', 'en');
+
+        $this->assertSame('Mr Test Kola', $q->customerName);
+        $this->assertSame('Monday', $q->proposedFor);
+    }
+
     public function test_albanian_total_with_title_in_the_accusative(): void
     {
         $q = $this->parser->parse('Ndërrim çezme banjoje për zotin Leka, 120 euro gjithsej, të shtunën');
@@ -223,6 +231,8 @@ class QuoteParserTest extends TestCase
         $this->assertSame('sq', $this->parser->parse('85 pjese 60 pune', 'en')->locale);
         $this->assertSame('en', $this->parser->parse('Hoxha 120', 'en')->locale);
         $this->assertSame('sq', $this->parser->parse('Hoxha 120', 'sq')->locale);
+        $this->assertSame('en', $this->parser->parse('Mrs Kola, Rruga e Kavajës 10, replace the tap, 38 parts, 30 labour, Friday', 'sq')->locale);
+        $this->assertSame('sq', $this->parser->parse('ndërrim çezme 40', 'en')->locale);
     }
 
     /** @param list<array{0: string, 1: float|int, 2: ?string, 3: int, 4: ItemKind}> $expected */

@@ -90,6 +90,18 @@ class QuoteLifecycleTest extends TestCase
         $this->assertSame(0, OutboundMessage::count());
     }
 
+    public function test_a_customer_known_only_by_number_needs_a_name_before_sending(): void
+    {
+        $owner = $this->owner();
+        $quote = $this->quoteFor($owner, $this->customerOf($owner, ['name' => '+355685551234', 'phone' => '355685551234']))->create();
+
+        $errors = $this->actingAs($owner)->postJson("/api/quotes/{$quote->id}/send")
+            ->assertUnprocessable()
+            ->json('errors');
+
+        $this->assertSame(['Add the customer’s name so the message can greet them.'], $errors['customer.name']);
+    }
+
     public function test_resending_an_expired_quote_renews_it(): void
     {
         $owner = $this->owner();

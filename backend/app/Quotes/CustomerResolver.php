@@ -42,12 +42,17 @@ class CustomerResolver
         $existing = $phone ? Customer::where('phone', $phone)->first() : null;
         if ($existing) {
             $existing->address ??= $address;
+            if ($name !== '' && ! preg_match('/\p{L}/u', $existing->name)) {
+                // Known until now only by the number.
+                $existing->name = $name;
+            }
             $existing->save();
 
             return $existing;
         }
 
         return Customer::create([
+            // Named after the number until someone types the name (sending asks for it).
             'name' => $name !== '' ? $name : '+'.$phone,
             'phone' => $phone,
             'address' => $address,

@@ -2,19 +2,22 @@ import { afterEach, describe, expect, it } from 'vitest'
 import * as sq from '../albanian'
 import { formatDate, formatMoney, formatPercent, formatRelative, setFormatLocale, setFormatTimeZone } from '../format'
 
+/** Spaces in expectations stand for the non-breaking spaces the formatter writes. */
+const nb = (text: string) => text.replace(/ /g, ' ')
+
 describe('Albanian numbers and money', () => {
   it('uses a decimal comma and groups thousands from ten thousand up', () => {
     expect(sq.number(1250.5, 2, 2)).toBe('1250,50')
-    expect(sq.number(12345, 0, 0)).toBe('12 345')
-    expect(sq.number(1234567.891, 0, 2)).toBe('1 234 567,89')
+    expect(sq.number(12345, 0, 0)).toBe(nb('12 345'))
+    expect(sq.number(1234567.891, 0, 2)).toBe(nb('1 234 567,89'))
     expect(sq.number(-3.5, 0, 1)).toBe('-3,5')
     expect(sq.number(2, 0, 2)).toBe('2')
   })
 
-  it('puts the currency after the amount', () => {
-    expect(sq.money(145, 'EUR', false)).toBe('145 €')
-    expect(sq.money(16.5, 'EUR', true)).toBe('16,50 €')
-    expect(sq.money(3500, 'ALL', false)).toBe('3500 Lekë')
+  it('puts the currency after the amount, on the same line', () => {
+    expect(sq.money(145, 'EUR', false)).toBe(nb('145 €'))
+    expect(sq.money(16.5, 'EUR', true)).toBe(nb('16,50 €'))
+    expect(sq.money(3500, 'ALL', false)).toBe(nb('3500 Lekë'))
   })
 })
 
@@ -57,7 +60,7 @@ describe('format helpers in Albanian', () => {
     setFormatLocale('sq')
     setFormatTimeZone('Europe/Tirane')
     const now = new Date('2026-09-23T12:00:00Z')
-    expect(formatMoney(28950)).toBe('289,50 €')
+    expect(formatMoney(28950)).toBe(nb('289,50 €'))
     expect(formatDate('2026-10-07')).toBe('7 tet 2026')
     expect(formatRelative('2026-09-20T12:00:00Z', now)).toBe('para 3 ditësh')
     expect(formatPercent(0.335)).toBe('34%')
