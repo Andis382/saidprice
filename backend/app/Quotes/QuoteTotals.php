@@ -11,7 +11,10 @@ class QuoteTotals
 {
     public static function line(float $qty, int $unitPriceCents): int
     {
-        return (int) round($qty * $unitPriceCents, 0, PHP_ROUND_HALF_UP);
+        // Quantities have two decimals: in whole hundredths the product is exact integer maths.
+        $hundredths = (int) round($qty * 100);
+
+        return (int) round($hundredths * $unitPriceCents / 100, 0, PHP_ROUND_HALF_UP);
     }
 
     /**

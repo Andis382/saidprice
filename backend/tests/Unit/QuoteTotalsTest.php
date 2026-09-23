@@ -13,7 +13,10 @@ class QuoteTotalsTest extends TestCase
         $this->assertSame(8500, QuoteTotals::line(1, 8500));
         $this->assertSame(1600, QuoteTotals::line(2, 800));
         $this->assertSame(3750, QuoteTotals::line(1.5, 2500));
-        $this->assertSame(334, QuoteTotals::line(0.333, 1003));
+        // 0.15 is not exact in binary; counted in hundredths, 15 x 30 / 100 = 4.5 rounds up.
+        $this->assertSame(5, QuoteTotals::line(0.15, 30));
+        // Quantities are kept to two decimals.
+        $this->assertSame(331, QuoteTotals::line(0.333, 1003));
         $this->assertSame(0, QuoteTotals::line(0, 999));
     }
 
