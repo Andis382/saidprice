@@ -14,10 +14,11 @@ class User extends Authenticatable
 
     public const OWNER = 'OWNER';
 
-    public const MEMBER = 'MEMBER';
+    /** Drafts and sends quotes; settings and the team stay with the owner. */
+    public const ASSISTANT = 'ASSISTANT';
 
     /** Roles an owner may hand out with a join link. */
-    public const INVITABLE_ROLES = [self::MEMBER];
+    public const INVITABLE_ROLES = [self::ASSISTANT];
 
     protected $fillable = ['organization_id', 'name', 'email', 'password', 'role', 'locale', 'last_login_at'];
 

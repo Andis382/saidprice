@@ -25,8 +25,8 @@ class UserFactory extends Factory
         ];
     }
 
-    public function member(): static
+    public function assistant(): static
     {
-        return $this->state(fn () => ['role' => User::MEMBER]);
+        return $this->state(fn () => ['role' => User::ASSISTANT]);
     }
 }
