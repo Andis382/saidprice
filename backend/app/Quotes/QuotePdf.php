@@ -5,6 +5,7 @@ namespace App\Quotes;
 use App\Models\BusinessSettings;
 use App\Models\Quote;
 use App\Support\Money;
+use App\Support\Phones;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
@@ -27,6 +28,7 @@ class QuotePdf
             't' => fn (string $key, array $params = []) => trans('pdf.'.$key, $params, $locale),
             'money' => $money,
             'date' => fn ($date) => Phrases::date($date, $locale),
+            'phone' => fn (?string $phone) => Phones::display($phone),
             'totals' => $totals,
             'qty' => fn (float $qty) => rtrim(rtrim(number_format($qty, 2, $locale === 'sq' ? ',' : '.', ''), '0'), '.,'),
         ])->setPaper('a4');

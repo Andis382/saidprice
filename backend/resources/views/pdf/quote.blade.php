@@ -48,7 +48,7 @@
             <tr>
                 <td>
                     <div class="business">{{ $business->name }}</div>
-                    <div class="trade">{{ collect([$trade, $business->phone ? '+'.$business->phone : null])->filter()->implode(' · ') }}</div>
+                    <div class="trade">{{ collect([$trade, $phone($business->phone)])->filter()->implode(' · ') }}</div>
                 </td>
                 <td class="doc">
                     <div class="doc-label">{{ $t('quote') }}</div>
@@ -66,7 +66,7 @@
                     <div class="label">{{ $t('for') }}</div>
                     <div class="value">{{ $quote->customer?->name ?? '—' }}</div>
                     @if ($quote->customer?->address)<div class="muted">{{ $quote->customer->address }}</div>@endif
-                    @if ($quote->customer?->phone)<div class="muted">+{{ $quote->customer->phone }}</div>@endif
+                    @if ($quote->customer?->phone)<div class="muted">{{ $phone($quote->customer->phone) }}</div>@endif
                 </td>
                 <td>
                     <div class="label">{{ $t('date') }}</div>

@@ -41,4 +41,18 @@ class Phones
     {
         return $normalized !== null && strlen($normalized) >= 8 && strlen($normalized) <= 15;
     }
+
+    /** "355691234567" -> "+355 69 123 4567", the way the web app shows it. */
+    public static function display(?string $normalized): string
+    {
+        $digits = preg_replace('/\D/', '', (string) $normalized);
+        if ($digits === '') {
+            return '';
+        }
+        if (strlen($digits) === 12 && (str_starts_with($digits, '355') || str_starts_with($digits, '383'))) {
+            return sprintf('+%s %s %s %s', substr($digits, 0, 3), substr($digits, 3, 2), substr($digits, 5, 3), substr($digits, 8));
+        }
+
+        return '+'.trim(chunk_split($digits, 3, ' '));
+    }
 }

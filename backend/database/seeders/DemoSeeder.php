@@ -332,6 +332,8 @@ class DemoSeeder extends Seeder
                 ['LABOUR', 'Punëdore', '', 1, null, [60, 60]],
             ],
         ], $createdAt, $this->owner, voice: true, when: 'Të enjten në mëngjes');
+        // A stable link for the demo and the README screenshots.
+        $quote->forceFill(['public_token' => 'demo-kitchen-tap'])->save();
         $sentAt = $createdAt->addMinutes(3);
         $this->at($sentAt, fn () => $this->workflow->send($quote, $this->owner));
         $this->at($sentAt->addMinutes(41), fn () => $this->workflow->viewed($quote));
