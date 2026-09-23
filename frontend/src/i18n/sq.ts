@@ -178,7 +178,8 @@ const sq: MessageSchema = {
   },
   quotes: {
     title: 'Ofertat',
-    subtitleWeek: 'Këtë javë: {sent} të dërguara, {won} të fituara ({money}), {rate} deri tani.',
+    subtitleWeek: 'Këtë javë: {sent} të dërguara, {won} të fituara për {money}.',
+    subtitleWaiting: 'Këtë javë: {sent} të dërguara, {open} presin përgjigje.',
     subtitleQuiet: 'Asgjë e dërguar këtë javë. Regjistroni të radhës te dera.',
     search: 'Klient, punë, numër ose telefon',
     found: '{n} të gjetura',

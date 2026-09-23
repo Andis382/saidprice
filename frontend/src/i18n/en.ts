@@ -176,7 +176,8 @@ const en = {
   },
   quotes: {
     title: 'Quotes',
-    subtitleWeek: 'This week: {sent} sent, {won} won ({money}), {rate} so far.',
+    subtitleWeek: 'This week: {sent} sent, {won} won for {money}.',
+    subtitleWaiting: 'This week: {sent} sent, {open} waiting for an answer.',
     subtitleQuiet: 'Nothing sent yet this week. Record the next one at the door.',
     search: 'Customer, job, number or phone',
     found: '{n} found',

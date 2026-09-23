@@ -11,7 +11,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import UiTabs from '@/components/ui/UiTabs.vue'
 import QuoteCard from '@/components/quote/QuoteCard.vue'
 import { api, query } from '@/lib/api'
-import { formatMoney, formatPercent } from '@/lib/format'
+import { formatMoney } from '@/lib/format'
 import { BOARD_COLUMNS, type BoardColumn, type QuoteSummary } from '@/lib/quote'
 import { useOverview } from '@/stores/overview'
 
@@ -37,12 +37,8 @@ const total = computed(() => columns.value?.reduce((sum, c) => sum + c.count, 0)
 const subtitle = computed(() => {
   const w = overview.thisWeek
   if (!w || !w.sent) return t('quotes.subtitleQuiet')
-  return t('quotes.subtitleWeek', {
-    sent: w.sent,
-    won: w.won,
-    money: formatMoney(w.wonCents),
-    rate: formatPercent(w.conversion ?? 0),
-  })
+  if (!w.won) return t('quotes.subtitleWaiting', { sent: w.sent, open: w.open })
+  return t('quotes.subtitleWeek', { sent: w.sent, won: w.won, money: formatMoney(w.wonCents) })
 })
 
 let timer = 0

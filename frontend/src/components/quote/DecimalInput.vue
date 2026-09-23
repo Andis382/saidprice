@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import UiInput from '@/components/ui/UiInput.vue'
-import { parseDecimal } from '@/lib/format'
+import { decimalSeparator, parseDecimal } from '@/lib/format'
 
 /**
  * A number field that accepts "1,5" as well as "1.5". With `cents` the model is integer
@@ -17,13 +17,11 @@ const props = withDefaults(defineProps<{ id?: string; cents?: boolean; prefix?: 
   describedby: undefined,
 })
 
-const decimalSeparator = (1.5).toLocaleString(document.documentElement.lang === 'sq' ? 'sq-AL' : 'en-GB').charAt(1)
-
 function show(value: number | null): string {
   if (value === null) return ''
   const units = props.cents ? value / 100 : value
   const text = Number.isInteger(units) ? String(units) : units.toFixed(2).replace(/0$/, '')
-  return text.replace('.', decimalSeparator)
+  return text.replace('.', decimalSeparator())
 }
 
 const text = ref(show(model.value))

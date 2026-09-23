@@ -1,4 +1,8 @@
-/** Locale-aware formatting. Albanian uses "sq-AL" conventions (day first, comma decimals). */
+/**
+ * Locale-aware formatting. English goes through Intl ("en-GB"); Albanian is written out in
+ * ./albanian because Chrome and Android ship without Albanian locale data.
+ */
+import * as sq from './albanian'
 
 let locale = 'en'
 let currency = 'EUR'
@@ -16,8 +20,8 @@ export function setFormatTimeZone(next: string | undefined) {
   timeZone = next
 }
 
-function tag(forLocale: string = locale) {
-  return forLocale === 'sq' ? 'sq-AL' : 'en-GB'
+function isSq(forLocale: string = locale) {
+  return forLocale === 'sq'
 }
 
 function toDate(value: string | number | Date): Date {
@@ -31,13 +35,15 @@ function toDate(value: string | number | Date): Date {
 export function formatDate(value: string | number | Date | null | undefined, style: 'short' | 'medium' | 'long' = 'medium', inLocale?: string) {
   if (value === null || value === undefined || value === '') return '—'
   const d = toDate(value)
+  const zone = isPlainDate(value) ? undefined : timeZone
+  if (isSq(inLocale)) return sq.date(sq.dateParts(d, zone), style)
   const options: Intl.DateTimeFormatOptions =
     style === 'short'
       ? { day: 'numeric', month: 'short' }
       : style === 'long'
         ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }
         : { day: 'numeric', month: 'short', year: 'numeric' }
-  return new Intl.DateTimeFormat(tag(inLocale), { ...options, timeZone: isPlainDate(value) ? undefined : timeZone }).format(d)
+  return new Intl.DateTimeFormat('en-GB', { ...options, timeZone: zone }).format(d)
 }
 
 /** Units for formatAge, in minutes: used while the age is below `upTo`. */
@@ -53,14 +59,15 @@ const AGE_UNITS = [
 export function formatAge(value: string | number | Date | null | undefined, now: Date = new Date()) {
   if (value === null || value === undefined || value === '') return '—'
   const minutes = Math.max(0, Math.round((now.getTime() - toDate(value).getTime()) / 60000))
-  if (minutes < 1) return locale === 'sq' ? 'tani' : 'now'
+  if (minutes < 1) return isSq() ? 'tani' : 'now'
   const unit = AGE_UNITS.find((u) => minutes < u.upTo) ?? AGE_UNITS[AGE_UNITS.length - 1]!
-  return `${Math.round(minutes / unit.size)}${locale === 'sq' ? unit.sq : unit.en}`
+  return `${Math.round(minutes / unit.size)}${isSq() ? unit.sq : unit.en}`
 }
 
 export function formatDateTime(value: string | number | Date | null | undefined) {
   if (value === null || value === undefined || value === '') return '—'
-  return new Intl.DateTimeFormat(tag(), {
+  if (isSq()) return sq.dateTime(sq.dateParts(toDate(value), timeZone))
+  return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -72,40 +79,49 @@ export function formatDateTime(value: string | number | Date | null | undefined)
 export function formatTime(value: string | number | Date | null | undefined) {
   if (value === null || value === undefined || value === '') return '—'
   if (typeof value === 'string' && /^\d{2}:\d{2}/.test(value)) return value.slice(0, 5)
-  return new Intl.DateTimeFormat(tag(), { hour: '2-digit', minute: '2-digit', timeZone }).format(toDate(value))
+  return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone }).format(toDate(value))
 }
 
 export function formatWeekday(value: string | Date, style: 'short' | 'long' = 'long') {
-  return new Intl.DateTimeFormat(tag(), { weekday: style }).format(toDate(value))
+  if (isSq()) return sq.weekday(sq.dateParts(toDate(value)), style)
+  return new Intl.DateTimeFormat('en-GB', { weekday: style }).format(toDate(value))
 }
 
 export function formatMonth(value: string | Date) {
-  return new Intl.DateTimeFormat(tag(), { month: 'long', year: 'numeric' }).format(toDate(value))
+  if (isSq()) return sq.month(sq.dateParts(toDate(value)))
+  return new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' }).format(toDate(value))
 }
 
-/** "3 days ago", "in 2 weeks" */
+/** Units for formatRelative, in seconds: used while the distance is below `below`. */
+const RELATIVE_UNITS = [
+  { below: 60, size: 1, unit: 'second' },
+  { below: 3600, size: 60, unit: 'minute' },
+  { below: 86400, size: 3600, unit: 'hour' },
+  { below: 86400 * 7, size: 86400, unit: 'day' },
+  { below: 86400 * 45, size: 86400 * 7, unit: 'week' },
+  { below: 86400 * 365, size: 86400 * 30, unit: 'month' },
+  { below: Infinity, size: 86400 * 365, unit: 'year' },
+] as const
+
+/** "3 days ago", "in 2 weeks" / "para 3 ditësh", "pas 2 javësh" */
 export function formatRelative(value: string | number | Date | null | undefined, now: Date = new Date()) {
   if (value === null || value === undefined || value === '') return '—'
-  const d = toDate(value)
-  const diffSeconds = Math.round((d.getTime() - now.getTime()) / 1000)
-  const abs = Math.abs(diffSeconds)
-  const rtf = new Intl.RelativeTimeFormat(tag(), { numeric: 'auto' })
-  if (abs < 60) return rtf.format(diffSeconds, 'second')
-  if (abs < 3600) return rtf.format(Math.round(diffSeconds / 60), 'minute')
-  if (abs < 86400) return rtf.format(Math.round(diffSeconds / 3600), 'hour')
-  if (abs < 86400 * 7) return rtf.format(Math.round(diffSeconds / 86400), 'day')
-  if (abs < 86400 * 45) return rtf.format(Math.round(diffSeconds / (86400 * 7)), 'week')
-  if (abs < 86400 * 365) return rtf.format(Math.round(diffSeconds / (86400 * 30)), 'month')
-  return rtf.format(Math.round(diffSeconds / (86400 * 365)), 'year')
+  const diffSeconds = Math.round((toDate(value).getTime() - now.getTime()) / 1000)
+  const step = RELATIVE_UNITS.find((u) => Math.abs(diffSeconds) < u.below) ?? RELATIVE_UNITS[RELATIVE_UNITS.length - 1]!
+  const n = Math.round(diffSeconds / step.size)
+  if (isSq()) return sq.relative(n, step.unit)
+  return new Intl.RelativeTimeFormat('en-GB', { numeric: 'auto' }).format(n, step.unit)
 }
 
-/** Money is always carried as integer cents. */
+/** Money is always carried as integer cents. `locale` formats it for another reader. */
 export function formatMoney(cents: number | null | undefined, options: { currency?: string; decimals?: boolean; locale?: string } = {}) {
   if (cents === null || cents === undefined) return '—'
   const decimals = options.decimals ?? cents % 100 !== 0
-  return new Intl.NumberFormat(tag(options.locale), {
+  const code = options.currency ?? currency
+  if (isSq(options.locale ?? locale)) return sq.money(cents / 100, code, decimals)
+  return new Intl.NumberFormat('en-GB', {
     style: 'currency',
-    currency: options.currency ?? currency,
+    currency: code,
     minimumFractionDigits: decimals ? 2 : 0,
     maximumFractionDigits: decimals ? 2 : 0,
   }).format(cents / 100)
@@ -113,8 +129,14 @@ export function formatMoney(cents: number | null | undefined, options: { currenc
 
 /** "€" for EUR, "Lekë" for ALL in Albanian: the symbol shown next to a price field. */
 export function currencySymbol(code: string = currency) {
-  const part = new Intl.NumberFormat(tag(), { style: 'currency', currency: code }).formatToParts(0).find((p) => p.type === 'currency')
+  if (isSq()) return sq.currencySymbol(code)
+  const part = new Intl.NumberFormat('en-GB', { style: 'currency', currency: code }).formatToParts(0).find((p) => p.type === 'currency')
   return part?.value ?? code
+}
+
+/** The decimal mark people expect to type: "1,5" in Albanian, "1.5" in English. */
+export function decimalSeparator() {
+  return isSq() ? ',' : '.'
 }
 
 /** Parses what people type as a decimal: "1,5", "1.5", " 2 ". */
@@ -127,12 +149,14 @@ export function parseDecimal(input: string | number | null | undefined): number 
 
 export function formatNumber(value: number | null | undefined, maximumFractionDigits = 1, inLocale?: string) {
   if (value === null || value === undefined || Number.isNaN(value)) return '—'
-  return new Intl.NumberFormat(tag(inLocale), { maximumFractionDigits }).format(value)
+  if (isSq(inLocale ?? locale)) return sq.number(value, 0, maximumFractionDigits)
+  return new Intl.NumberFormat('en-GB', { maximumFractionDigits }).format(value)
 }
 
 export function formatPercent(value: number | null | undefined, maximumFractionDigits = 0) {
   if (value === null || value === undefined || Number.isNaN(value)) return '—'
-  return new Intl.NumberFormat(tag(), { style: 'percent', maximumFractionDigits }).format(value)
+  if (isSq()) return `${sq.number(value * 100, 0, maximumFractionDigits)}%`
+  return new Intl.NumberFormat('en-GB', { style: 'percent', maximumFractionDigits }).format(value)
 }
 
 /** "355691234567" -> "+355 69 123 4567" (Albanian mobile grouping, generic otherwise) */

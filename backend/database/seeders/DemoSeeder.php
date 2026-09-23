@@ -147,6 +147,7 @@ class DemoSeeder extends Seeder
             }
             $day = $day->addDay();
         }
+        $plan[] = [$this->local('-3 days 11:20'), 'quiet'];
         $plan[] = [$this->local('yesterday 09:10'), 'hoxha'];
         $plan[] = [$this->local('yesterday 14:30'), 'regular'];
         $plan[] = [$this->local('yesterday 17:45'), 'typedDraft'];
@@ -335,6 +336,16 @@ class DemoSeeder extends Seeder
         $this->at($sentAt, fn () => $this->workflow->send($quote, $this->owner));
         $this->at($sentAt->addMinutes(41), fn () => $this->workflow->viewed($quote));
         $this->at($this->recent('07:40', 'yesterday 20:10'), fn () => $this->whatsApp($quote, 'A mund të vini të premten në vend të së enjtes? Të enjten jam në punë.'));
+    }
+
+    /** Opened three days ago and not a word since: its first follow-up waits in the inbox. */
+    private function quiet(CarbonImmutable $createdAt): void
+    {
+        $customer = $this->customer('Ilir Dervishi', 'sq', 'Rruga e Kavajës 118, ap. 6');
+        $quote = $this->draft($customer, DemoCatalog::JOBS[2], $createdAt, $this->owner, voice: true, when: 'Të premten pasdite');
+        $sentAt = $createdAt->addMinutes(6);
+        $this->at($sentAt, fn () => $this->workflow->send($quote, $this->owner));
+        $this->live($quote, $sentAt->addMinutes(35), null, null);
     }
 
     private function typedDraft(CarbonImmutable $createdAt): void
