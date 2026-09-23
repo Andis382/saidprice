@@ -17,7 +17,8 @@ class QuotePresenter
         return [
             'id' => $quote->id,
             'number' => $quote->number,
-            'title' => $quote->displayTitle(),
+            // Raw: the app shows its own words for a draft nobody named yet.
+            'title' => $quote->title,
             'status' => $quote->status->value,
             'outcome' => $quote->outcome?->value,
             'source' => $quote->source,

@@ -18,14 +18,14 @@ class MessagesController extends Controller
     {
         $limit = min((int) $request->query('limit', 100), 500);
 
-        return response()->json(OutboundMessage::latest('id')->limit($limit)->get()->map->toApi());
+        return response()->json(OutboundMessage::latest('created_at')->latest('id')->limit($limit)->get()->map->toApi());
     }
 
     public function inbox(Request $request): JsonResponse
     {
         $limit = min((int) $request->query('limit', 100), 500);
         $messages = InboundMessage::where('organization_id', $request->user()->organization_id)
-            ->latest('id')->limit($limit)->get();
+            ->latest('received_at')->latest('id')->limit($limit)->get();
 
         return response()->json($messages->map->toApi());
     }

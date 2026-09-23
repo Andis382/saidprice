@@ -93,7 +93,7 @@ class FollowUps
             ->get();
     }
 
-    private function draftNudge(Quote $quote, int $sequence): void
+    public function draftNudge(Quote $quote, int $sequence): void
     {
         $quote->nudges()->create([
             'organization_id' => $quote->organization_id,
