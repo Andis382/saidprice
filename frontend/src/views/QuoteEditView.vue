@@ -32,7 +32,7 @@ import QuoteDocument from '@/components/quote/QuoteDocument.vue'
 import SentDialog from '@/components/quote/SentDialog.vue'
 import { api, ApiError } from '@/lib/api'
 import { useForm } from '@/lib/form'
-import { formatDate, formatMoney, todayIso } from '@/lib/format'
+import { formatDate, formatMoney, formatPhone, todayIso } from '@/lib/format'
 import type { OutboundMessage } from '@/lib/messages'
 import { addDays, totalsOf, type CustomerDraft, type ParsedQuote, type QuoteDetail, type QuoteItem } from '@/lib/quote'
 import { appendTranscript, useSpeech } from '@/lib/speech'
@@ -97,7 +97,7 @@ function fill(q: QuoteDetail) {
   form.fill({
     title: q.title ?? '',
     customer: q.customer
-      ? { id: q.customer.id, name: q.customer.name, phone: q.customer.phone ?? '', address: q.customer.address ?? '', locale: q.customer.locale }
+      ? { id: q.customer.id, name: q.customer.name, phone: q.customer.phone ? formatPhone(q.customer.phone) : '', address: q.customer.address ?? '', locale: q.customer.locale }
       : { id: null, name: '', phone: '', address: '', locale: auth.organization?.locale ?? 'sq' },
     items: q.items.map((i) => ({ ...i })),
     proposedFor: q.proposedFor ?? '',
@@ -217,8 +217,8 @@ onBeforeRouteLeave(async () => {
     :back-label="$t('editor.backToQuote')"
   >
     <template #actions>
-      <UiButton variant="inverse" :icon="PhFloppyDisk" :loading="form.processing.value && !sending" :disabled="!quote || sending" @click="save()">{{ $t('common.save') }}</UiButton>
-      <UiButton :icon="PhPaperPlaneTilt" :loading="sending" :disabled="!quote" @click="send">
+      <UiButton class="wide-only" variant="inverse" :icon="PhFloppyDisk" :loading="form.processing.value && !sending" :disabled="!quote || sending" @click="save()">{{ $t('common.save') }}</UiButton>
+      <UiButton class="wide-only" :icon="PhPaperPlaneTilt" :loading="sending" :disabled="!quote" @click="send">
         {{ quote?.can.send === false ? $t('editor.sendAgain') : $t('editor.send') }}
       </UiButton>
     </template>
@@ -436,7 +436,7 @@ onBeforeRouteLeave(async () => {
   .layout {
     grid-template-columns: minmax(0, 1fr);
     /* room for the floating total bar */
-    padding-bottom: 76px;
+    padding-bottom: 96px;
   }
   .panes {
     display: block;
@@ -451,7 +451,8 @@ onBeforeRouteLeave(async () => {
   .preview {
     position: static;
   }
-  .bottom-actions {
+  .bottom-actions,
+  .wide-only {
     display: none;
   }
   .sticky {
@@ -459,7 +460,8 @@ onBeforeRouteLeave(async () => {
     z-index: 25;
     left: 12px;
     right: 12px;
-    bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 12px);
+    /* clears the raised record button in the tab bar */
+    bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 34px);
     display: flex;
     align-items: center;
     gap: 8px;

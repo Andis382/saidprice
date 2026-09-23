@@ -157,10 +157,13 @@ class DemoSeeder extends Seeder
         return $plan;
     }
 
-    /** A clock time in Tirana, as UTC. */
+    /**
+     * A clock time in Tirana relative to the real now ("yesterday 09:10"), as UTC. Not
+     * CarbonImmutable::parse(): that reads the moved test clock of the story being played.
+     */
     private function local(string $when): CarbonImmutable
     {
-        return CarbonImmutable::parse($when, $this->org->timezone)->utc();
+        return $this->now->setTimezone($this->org->timezone)->modify($when)->utc();
     }
 
     /** This morning if it is already past, else the evening before: seeding at 4 AM still looks like a working day. */

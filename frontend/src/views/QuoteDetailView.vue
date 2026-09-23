@@ -228,6 +228,7 @@ function onNudgeSent(message: OutboundMessage) {
           :notes="quote.notes"
           :terms="quote.terms"
           :date="quote.sentAt"
+          :lang="quote.customer?.locale"
         />
       </div>
 

@@ -17,6 +17,7 @@ const router = useRouter()
 
 const items = computed(() => NAV.filter((i) => !i.roles || auth.hasRole(...i.roles)))
 const links = computed(() => items.value.filter((i) => !i.cta))
+const barLinks = computed(() => links.value.filter((i) => !i.accountMenu))
 const cta = computed(() => items.value.find((i) => i.cta))
 const primary = computed(() => links.value.filter((i) => i.primary).slice(0, 3))
 const moreOpen = ref(false)
@@ -70,7 +71,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
 
         <nav class="band__nav" :aria-label="$t('common.menu')">
           <RouterLink
-            v-for="i in links"
+            v-for="i in barLinks"
             :key="i.name"
             :to="{ name: i.name }"
             class="navlink"
@@ -264,6 +265,10 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   color: var(--header-text);
   background: rgb(255 255 255 / 0.08);
 }
+.navlink :deep(svg),
+.band__cta :deep(svg) {
+  flex: none;
+}
 .navlink.is-active {
   color: var(--on-primary);
   background: linear-gradient(180deg, var(--primary-fill-from), var(--primary-fill-to));
@@ -284,7 +289,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   padding: 0 6px;
   border-radius: var(--radius-pill);
   background: var(--danger);
-  color: #fff;
+  color: var(--text-inverse);
   font-size: 11px;
   font-weight: 750;
   line-height: 1;
@@ -472,7 +477,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   border: 2px solid var(--surface);
   border-radius: var(--radius-pill);
   background: var(--danger);
-  color: #fff;
+  color: var(--text-inverse);
   font-size: 10px;
   font-weight: 750;
   line-height: 14px;
@@ -587,7 +592,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
   transform: translateY(-4px);
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1360px) {
   .band__lang,
   .user__who,
   .user__caret {

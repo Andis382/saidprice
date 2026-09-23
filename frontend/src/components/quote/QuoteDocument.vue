@@ -28,7 +28,9 @@ const props = withDefaults(
 )
 
 const { t, locale } = useI18n()
-const l = (key: string, params: Record<string, unknown> = {}) => t(`document.${key}`, params, { locale: props.lang ?? locale.value })
+const reader = computed(() => props.lang ?? locale.value)
+const l = (key: string, params: Record<string, unknown> = {}) => t(`document.${key}`, params, { locale: reader.value })
+const money = (cents: number) => formatMoney(cents, { locale: reader.value })
 const showSubtotals = computed(() => props.totals.parts > 0 && props.totals.labour > 0)
 </script>
 
@@ -56,7 +58,7 @@ const showSubtotals = computed(() => props.totals.parts > 0 && props.totals.labo
       </div>
       <div>
         <dt><PhHourglassMedium :size="14" weight="bold" aria-hidden="true" /> {{ l('validUntil') }}</dt>
-        <dd>{{ validUntil ? formatDate(validUntil) : '—' }}</dd>
+        <dd>{{ validUntil ? formatDate(validUntil, 'medium', reader) : '—' }}</dd>
       </div>
     </dl>
 
@@ -69,21 +71,21 @@ const showSubtotals = computed(() => props.totals.parts > 0 && props.totals.labo
           <span class="line__kind" :class="`line__kind--${item.kind.toLowerCase()}`">{{ l(`kinds.${item.kind}`) }}</span>
         </div>
         <span class="line__qty num">
-          <template v-if="item.qty !== 1 || item.unit">{{ formatNumber(item.qty, 2) }}{{ item.unit ? ` ${item.unit}` : '' }} × {{ formatMoney(item.unitPriceCents) }}</template>
+          <template v-if="item.qty !== 1 || item.unit">{{ formatNumber(item.qty, 2, reader) }}{{ item.unit ? ` ${item.unit}` : '' }} × {{ money(item.unitPriceCents) }}</template>
         </span>
-        <span class="line__amount num">{{ formatMoney(lineTotal(item.qty, item.unitPriceCents)) }}</span>
+        <span class="line__amount num">{{ money(lineTotal(item.qty, item.unitPriceCents)) }}</span>
       </li>
       <li v-if="!items.length" class="line line--empty">{{ l('noLines') }}</li>
     </ul>
 
     <div class="doc__sums">
       <template v-if="showSubtotals">
-        <div class="sum"><span>{{ l('kinds.PARTS') }}</span><span class="num">{{ formatMoney(totals.parts) }}</span></div>
-        <div class="sum"><span>{{ l('kinds.LABOUR') }}</span><span class="num">{{ formatMoney(totals.labour) }}</span></div>
+        <div class="sum"><span>{{ l('kinds.PARTS') }}</span><span class="num">{{ money(totals.parts) }}</span></div>
+        <div class="sum"><span>{{ l('kinds.LABOUR') }}</span><span class="num">{{ money(totals.labour) }}</span></div>
       </template>
       <div class="sum sum--total">
         <span>{{ l('total') }}</span>
-        <span class="num">{{ formatMoney(totals.total) }}</span>
+        <span class="num">{{ money(totals.total) }}</span>
       </div>
     </div>
 
@@ -95,7 +97,7 @@ const showSubtotals = computed(() => props.totals.parts > 0 && props.totals.labo
       <h4>{{ l('terms') }}</h4>
       <p>{{ terms }}</p>
     </section>
-    <p v-if="date" class="doc__date">{{ l('dated', { date: formatDate(date, 'long') }) }}</p>
+    <p v-if="date" class="doc__date">{{ l('dated', { date: formatDate(date, 'long', reader) }) }}</p>
   </article>
 </template>
 

@@ -25,7 +25,7 @@ const customer = ref<(CustomerRow & { quotes: QuoteSummary[] }) | null>(null)
 const editing = ref(false)
 const starting = ref(false)
 
-const conversion = computed(() => (customer.value?.quotesCount ? customer.value.wonCount / customer.value.quotesCount : null))
+const conversion = computed(() => (customer.value?.sentCount ? customer.value.wonCount / customer.value.sentCount : null))
 
 async function load() {
   customer.value = await api.get(`/customers/${route.params.id}`)
@@ -68,7 +68,7 @@ onMounted(load)
     <template v-else>
       <div class="tiles">
         <UiStat :label="$t('customers.quoted')" :value="formatMoney(customer.quotedCents)" tone="neutral" :icon="PhNotepad" :hint="$t('customers.quotesCount', { n: customer.quotesCount }, customer.quotesCount)" />
-        <UiStat :label="$t('customers.won')" :value="formatMoney(customer.wonCents)" tone="success" :icon="PhCoins" :hint="$t('customers.wonOf', { won: customer.wonCount, total: customer.quotesCount })" />
+        <UiStat :label="$t('customers.won')" :value="formatMoney(customer.wonCents)" tone="success" :icon="PhCoins" :hint="customer.sentCount ? $t('customers.wonOf', { won: customer.wonCount, total: customer.sentCount }) : $t('customers.none')" />
         <UiStat :label="$t('stats.conversion')" :value="formatPercent(conversion)" tone="info" :icon="PhPercent" />
       </div>
 

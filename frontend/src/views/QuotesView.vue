@@ -24,7 +24,11 @@ const overview = useOverview()
 
 const columns = ref<Column[] | null>(null)
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
-const tab = ref<BoardColumn>(BOARD_COLUMNS.includes(route.query.tab as BoardColumn) ? (route.query.tab as BoardColumn) : 'SENT')
+const askedTab = BOARD_COLUMNS.includes(route.query.tab as BoardColumn) ? (route.query.tab as BoardColumn) : null
+const tab = ref<BoardColumn>(askedTab ?? 'SENT')
+
+/** On a phone, open where the work is: quotes waiting for an answer first. */
+const TAB_PREFERENCE: BoardColumn[] = ['VIEWED', 'SENT', 'DRAFT', 'ACCEPTED', 'SILENT', 'DECLINED']
 
 const tabs = computed(() => (columns.value ?? []).map((c) => ({ value: c.key, label: t(`columns.${c.key}`), count: c.count })))
 const active = computed(() => columns.value?.find((c) => c.key === tab.value) ?? null)
@@ -45,6 +49,10 @@ let timer = 0
 async function load() {
   const data = await api.get<{ columns: Column[] }>('/quotes' + query({ q: search.value.trim() }))
   columns.value = data.columns
+  if (!askedTab) {
+    const counts = Object.fromEntries(data.columns.map((c) => [c.key, c.count]))
+    tab.value = TAB_PREFERENCE.find((key) => counts[key]) ?? 'SENT'
+  }
 }
 
 watch(search, () => {
@@ -54,17 +62,16 @@ watch(search, () => {
     load()
   }, 250)
 })
-watch(tab, (value) => router.replace({ query: { ...route.query, tab: value } }))
+function pick(value: BoardColumn) {
+  tab.value = value
+  router.replace({ query: { ...route.query, tab: value } })
+}
 
 onMounted(load)
 </script>
 
 <template>
   <AppPage :title="$t('quotes.title')" :subtitle="subtitle">
-    <template #actions>
-      <UiButton :to="{ name: 'quote-new' }" :icon="PhMicrophone" size="lg">{{ $t('nav.newQuote') }}</UiButton>
-    </template>
-
     <div class="toolbar">
       <UiSearch v-model="search" :placeholder="$t('quotes.search')" class="toolbar__search" />
       <p v-if="columns && search" class="small muted" role="status">{{ $t('quotes.found', { n: total }) }}</p>
@@ -106,7 +113,7 @@ onMounted(load)
 
       <!-- Phones and tablets: one column at a time -->
       <div class="stacked">
-        <UiTabs v-model="tab" :tabs="tabs" :label="$t('quotes.title')" />
+        <UiTabs :model-value="tab" :tabs="tabs" :label="$t('quotes.title')" @update:model-value="pick" />
         <div v-if="active" class="stacked__meta">
           <span>{{ $t(`columns.${active.key}`) }}</span>
           <span class="num strong">{{ formatMoney(active.totalCents) }}</span>
@@ -128,7 +135,7 @@ onMounted(load)
   gap: 12px 16px;
 }
 .toolbar__search {
-  width: min(100%, 380px);
+  width: min(100%, 420px);
 }
 .board {
   display: grid;

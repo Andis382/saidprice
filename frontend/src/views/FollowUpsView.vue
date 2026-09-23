@@ -91,10 +91,11 @@ onMounted(load)
   gap: 20px;
   align-items: start;
 }
+/* sits on the lower edge of the dark band */
 .count {
   font-size: var(--text-sm);
   font-weight: 650;
-  color: var(--text-muted);
+  color: var(--text-inverse-muted);
 }
 .how {
   display: flex;

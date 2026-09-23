@@ -91,7 +91,8 @@ class CustomerController extends Controller
     private function withHistory(Builder $query): Builder
     {
         return $query
-            ->withCount(['quotes as quotes_count' => fn ($q) => $q->where('status', '!=', QuoteStatus::Draft)])
+            ->withCount('quotes as quotes_count')
+            ->withCount(['quotes as sent_count' => fn ($q) => $q->where('status', '!=', QuoteStatus::Draft)])
             ->withCount(['quotes as won_count' => fn ($q) => $q->won()])
             ->withSum(['quotes as won_cents' => fn ($q) => $q->won()], 'total_cents')
             ->withSum(['quotes as quoted_cents' => fn ($q) => $q->where('status', '!=', QuoteStatus::Draft)], 'total_cents')
@@ -103,6 +104,7 @@ class CustomerController extends Controller
         return [
             ...$c->toApi(),
             'quotesCount' => (int) $c->quotes_count,
+            'sentCount' => (int) $c->sent_count,
             'wonCount' => (int) $c->won_count,
             'wonCents' => (int) $c->won_cents,
             'quotedCents' => (int) $c->quoted_cents,

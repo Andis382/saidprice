@@ -16,8 +16,8 @@ export function setFormatTimeZone(next: string | undefined) {
   timeZone = next
 }
 
-function tag() {
-  return locale === 'sq' ? 'sq-AL' : 'en-GB'
+function tag(forLocale: string = locale) {
+  return forLocale === 'sq' ? 'sq-AL' : 'en-GB'
 }
 
 function toDate(value: string | number | Date): Date {
@@ -27,7 +27,8 @@ function toDate(value: string | number | Date): Date {
   return new Date(value)
 }
 
-export function formatDate(value: string | number | Date | null | undefined, style: 'short' | 'medium' | 'long' = 'medium') {
+/** `inLocale` renders a date for someone reading another language (the customer's preview). */
+export function formatDate(value: string | number | Date | null | undefined, style: 'short' | 'medium' | 'long' = 'medium', inLocale?: string) {
   if (value === null || value === undefined || value === '') return '—'
   const d = toDate(value)
   const options: Intl.DateTimeFormatOptions =
@@ -36,7 +37,25 @@ export function formatDate(value: string | number | Date | null | undefined, sty
       : style === 'long'
         ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }
         : { day: 'numeric', month: 'short', year: 'numeric' }
-  return new Intl.DateTimeFormat(tag(), { ...options, timeZone: isPlainDate(value) ? undefined : timeZone }).format(d)
+  return new Intl.DateTimeFormat(tag(inLocale), { ...options, timeZone: isPlainDate(value) ? undefined : timeZone }).format(d)
+}
+
+/** Units for formatAge, in minutes: used while the age is below `upTo`. */
+const AGE_UNITS = [
+  { upTo: 60, size: 1, en: 'm', sq: ' min' },
+  { upTo: 60 * 24, size: 60, en: 'h', sq: ' orë' },
+  { upTo: 60 * 24 * 7, size: 60 * 24, en: 'd', sq: ' ditë' },
+  { upTo: 60 * 24 * 56, size: 60 * 24 * 7, en: 'w', sq: ' javë' },
+  { upTo: Infinity, size: 60 * 24 * 30, en: 'mo', sq: ' muaj' },
+]
+
+/** How long ago, as short as a card allows: "3h", "2d" in English, "3 orë", "2 ditë" in Albanian. */
+export function formatAge(value: string | number | Date | null | undefined, now: Date = new Date()) {
+  if (value === null || value === undefined || value === '') return '—'
+  const minutes = Math.max(0, Math.round((now.getTime() - toDate(value).getTime()) / 60000))
+  if (minutes < 1) return locale === 'sq' ? 'tani' : 'now'
+  const unit = AGE_UNITS.find((u) => minutes < u.upTo) ?? AGE_UNITS[AGE_UNITS.length - 1]!
+  return `${Math.round(minutes / unit.size)}${locale === 'sq' ? unit.sq : unit.en}`
 }
 
 export function formatDateTime(value: string | number | Date | null | undefined) {
@@ -81,10 +100,10 @@ export function formatRelative(value: string | number | Date | null | undefined,
 }
 
 /** Money is always carried as integer cents. */
-export function formatMoney(cents: number | null | undefined, options: { currency?: string; decimals?: boolean } = {}) {
+export function formatMoney(cents: number | null | undefined, options: { currency?: string; decimals?: boolean; locale?: string } = {}) {
   if (cents === null || cents === undefined) return '—'
   const decimals = options.decimals ?? cents % 100 !== 0
-  return new Intl.NumberFormat(tag(), {
+  return new Intl.NumberFormat(tag(options.locale), {
     style: 'currency',
     currency: options.currency ?? currency,
     minimumFractionDigits: decimals ? 2 : 0,
@@ -106,9 +125,9 @@ export function parseDecimal(input: string | number | null | undefined): number 
   return Number.isFinite(n) ? n : null
 }
 
-export function formatNumber(value: number | null | undefined, maximumFractionDigits = 1) {
+export function formatNumber(value: number | null | undefined, maximumFractionDigits = 1, inLocale?: string) {
   if (value === null || value === undefined || Number.isNaN(value)) return '—'
-  return new Intl.NumberFormat(tag(), { maximumFractionDigits }).format(value)
+  return new Intl.NumberFormat(tag(inLocale), { maximumFractionDigits }).format(value)
 }
 
 export function formatPercent(value: number | null | undefined, maximumFractionDigits = 0) {

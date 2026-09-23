@@ -27,7 +27,14 @@ export type Customer = {
 export type CustomerDraft = { id: number | null; name: string; phone: string; address: string; locale: 'en' | 'sq' }
 
 /** A customer with their history, as the customer list shows it. */
-export type CustomerRow = Customer & { quotesCount: number; wonCount: number; wonCents: number; quotedCents: number; lastQuoteAt: string | null }
+export type CustomerRow = Customer & {
+  quotesCount: number
+  sentCount: number
+  wonCount: number
+  wonCents: number
+  quotedCents: number
+  lastQuoteAt: string | null
+}
 
 export type QuoteSummary = {
   id: number

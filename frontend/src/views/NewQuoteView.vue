@@ -177,10 +177,10 @@ async function submit(blank = false) {
       <aside class="guide">
         <UiCard :title="$t('capture.exampleTitle')" :icon="PhUserSound">
           <p class="example">
-            <span class="seg seg--who">{{ $t(`capture.example.${speakIn}.who`) }}</span>,
-            <span class="seg seg--where">{{ $t(`capture.example.${speakIn}.where`) }}</span>,
-            <span class="seg seg--what">{{ $t(`capture.example.${speakIn}.what`) }}</span>,
-            <span class="seg seg--price">{{ $t(`capture.example.${speakIn}.price`) }}</span>,
+            <span class="seg seg--who">{{ $t(`capture.example.${speakIn}.who`) }}</span>
+            <span class="seg seg--where">{{ $t(`capture.example.${speakIn}.where`) }}</span>
+            <span class="seg seg--what">{{ $t(`capture.example.${speakIn}.what`) }}</span>
+            <span class="seg seg--price">{{ $t(`capture.example.${speakIn}.price`) }}</span>
             <span class="seg seg--when">{{ $t(`capture.example.${speakIn}.when`) }}</span>
           </p>
           <ul class="legend">

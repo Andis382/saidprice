@@ -22,7 +22,8 @@ class CustomersAndSettingsTest extends TestCase
         $this->quoteFor($owner, $arta)->create();
 
         $this->actingAs($owner)->getJson('/api/customers')->assertOk()
-            ->assertJsonPath('0.quotesCount', 2)
+            ->assertJsonPath('0.quotesCount', 3)
+            ->assertJsonPath('0.sentCount', 2)
             ->assertJsonPath('0.wonCount', 1)
             ->assertJsonPath('0.wonCents', 14500)
             ->assertJsonPath('0.quotedCents', 29000);

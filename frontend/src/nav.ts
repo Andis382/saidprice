@@ -13,6 +13,8 @@ export type NavItem = {
   cta?: boolean
   /** key in the overview store whose count shows as a badge */
   badge?: 'followUps'
+  /** reached from the account menu on desktop (and the More sheet on phones), not the top bar */
+  accountMenu?: boolean
   roles?: string[]
 }
 
@@ -23,5 +25,5 @@ export const NAV: NavItem[] = [
   { name: 'stats', label: 'nav.stats', icon: PhChartBar, primary: true },
   { name: 'customers', label: 'nav.customers', icon: PhAddressBook },
   { name: 'messages', label: 'nav.messages', icon: PhChatCircleDots },
-  { name: 'settings', label: 'nav.settings', icon: PhGearSix },
+  { name: 'settings', label: 'nav.settings', icon: PhGearSix, accountMenu: true },
 ]

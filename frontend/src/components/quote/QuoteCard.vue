@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { PhBellRinging, PhChatCircleText, PhCheckCircle, PhEye, PhMicrophone, PhWhatsappLogo, PhXCircle } from '@phosphor-icons/vue'
-import { formatMoney, formatRelative } from '@/lib/format'
+import { formatAge, formatMoney, formatRelative } from '@/lib/format'
 import type { QuoteSummary } from '@/lib/quote'
 
 /** One quote on the board: who, what, how much, and what is going on with it. */
@@ -22,7 +22,7 @@ const when = computed(() => {
       <span class="qcard__who truncate">
         {{ quote.customer?.name ?? (quote.source === 'WHATSAPP' ? $t('quotes.fromWhatsApp') : $t('quotes.noCustomer')) }}
       </span>
-      <time class="qcard__when" :datetime="when ?? undefined">{{ formatRelative(when) }}</time>
+      <time class="qcard__when num" :datetime="when ?? undefined" :title="formatRelative(when)">{{ formatAge(when) }}</time>
     </div>
     <p class="qcard__title">{{ quote.title ?? (quote.source === 'WHATSAPP' ? $t('quotes.voiceNoteWaiting') : $t('quotes.untitled')) }}</p>
     <div class="qcard__foot">
@@ -186,7 +186,7 @@ const when = computed(() => {
   padding: 0 8px;
   border-radius: var(--radius-pill);
   background: var(--gray-700);
-  color: #fff;
+  color: var(--text-inverse);
   font-size: 10.5px;
   font-weight: 750;
   letter-spacing: 0.02em;

@@ -37,7 +37,7 @@ watch([search, picking], () => {
 })
 
 function pick(c: Customer) {
-  model.value = { id: c.id, name: c.name, phone: c.phone ?? '', address: c.address ?? '', locale: c.locale }
+  model.value = { id: c.id, name: c.name, phone: c.phone ? formatPhone(c.phone) : '', address: c.address ?? '', locale: c.locale }
   picking.value = false
   search.value = ''
 }

@@ -11,7 +11,7 @@ import UiSearch from '@/components/ui/UiSearch.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import CustomerDialog from '@/components/quote/CustomerDialog.vue'
 import { api, query } from '@/lib/api'
-import { formatMoney, formatPhone, formatRelative } from '@/lib/format'
+import { formatDate, formatMoney, formatPhone } from '@/lib/format'
 import type { CustomerRow } from '@/lib/quote'
 
 const router = useRouter()
@@ -51,11 +51,11 @@ onMounted(load)
             </span>
             <span class="row__col num">
               <span class="row__big">{{ $t('customers.quotesCount', { n: c.quotesCount }, c.quotesCount) }}</span>
-              <span class="row__sub">{{ c.lastQuoteAt ? $t('customers.last', { when: formatRelative(c.lastQuoteAt) }) : $t('customers.none') }}</span>
+              <span class="row__sub">{{ c.lastQuoteAt ? $t('customers.last', { date: formatDate(c.lastQuoteAt, 'short') }) : $t('customers.none') }}</span>
             </span>
             <span class="row__col row__col--won num">
               <span class="row__big">{{ formatMoney(c.wonCents) }}</span>
-              <span class="row__sub">{{ $t('customers.wonOf', { won: c.wonCount, total: c.quotesCount }) }}</span>
+              <span class="row__sub">{{ c.sentCount ? $t('customers.wonOf', { won: c.wonCount, total: c.sentCount }) : $t('customers.none') }}</span>
             </span>
           </RouterLink>
         </li>

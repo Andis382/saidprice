@@ -18,7 +18,7 @@ import UiFormErrors from '@/components/ui/UiFormErrors.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import { api } from '@/lib/api'
 import { useForm } from '@/lib/form'
-import { formatRelative } from '@/lib/format'
+import { formatPhone, formatRelative } from '@/lib/format'
 import { useAuth, type Me, type Organization } from '@/stores/auth'
 import { useToasts } from '@/stores/toasts'
 import { useConfirm } from '@/stores/confirm'
@@ -37,7 +37,7 @@ const isOwner = computed(() => auth.hasRole('OWNER'))
 const profile = useForm({ name: auth.user?.name ?? '', locale: (auth.user?.locale ?? 'sq') as Locale })
 const org = useForm({
   name: auth.organization?.name ?? '',
-  phone: auth.organization?.phone ?? '',
+  phone: auth.organization?.phone ? formatPhone(auth.organization.phone) : '',
   locale: (auth.organization?.locale ?? 'sq') as Locale,
   timezone: auth.organization?.timezone ?? 'Europe/Tirane',
   currency: auth.organization?.currency ?? 'EUR',

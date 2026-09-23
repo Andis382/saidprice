@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PhArrowDown, PhBellRinging, PhChartLineUp, PhCheckCircle, PhMicrophone, PhPlay, PhWhatsappLogo } from '@phosphor-icons/vue'
+import { formatMoney } from '@/lib/format'
 
 // The sign-in page's left panel: the promise, and what it looks like in practice.
 const points = [
@@ -37,9 +38,9 @@ const bars = [0.3, 0.55, 0.8, 0.45, 0.95, 0.6, 0.35, 0.7, 0.9, 0.5, 0.25, 0.65, 
           <span class="paper__no">Q-2026-0042</span>
         </div>
         <p class="paper__title">{{ $t('aside.artifact.title') }}</p>
-        <div class="paper__line"><span>{{ $t('aside.artifact.parts') }}</span><span>85 €</span></div>
-        <div class="paper__line"><span>{{ $t('aside.artifact.labour') }}</span><span>60 €</span></div>
-        <div class="paper__total"><span>{{ $t('document.total') }}</span><span>145 €</span></div>
+        <div class="paper__line"><span>{{ $t('aside.artifact.parts') }}</span><span>{{ formatMoney(8500, { currency: 'EUR' }) }}</span></div>
+        <div class="paper__line"><span>{{ $t('aside.artifact.labour') }}</span><span>{{ formatMoney(6000, { currency: 'EUR' }) }}</span></div>
+        <div class="paper__total"><span>{{ $t('document.total') }}</span><span>{{ formatMoney(14500, { currency: 'EUR' }) }}</span></div>
         <div class="paper__foot">
           <span>{{ $t('aside.artifact.when') }}</span>
           <span class="paper__ok"><PhCheckCircle :size="14" weight="fill" /> {{ $t('status.ACCEPTED') }}</span>
