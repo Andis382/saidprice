@@ -60,10 +60,10 @@ const when = computed(() => {
             <PhEye :size="15" aria-hidden="true" />
             <span class="visually-hidden">{{ $t('quotes.signals.viewed') }}</span>
           </span>
-          <span v-if="quote.source === 'WHATSAPP'" class="sig" :title="$t('quotes.signals.whatsapp')">
+          <span v-if="quote.status === 'DRAFT' && quote.source === 'WHATSAPP'" class="sig" :title="$t('quotes.signals.whatsapp')">
             <PhWhatsappLogo :size="15" aria-hidden="true" />
           </span>
-          <span v-else-if="quote.hasVoice" class="sig" :title="$t('quotes.signals.voice')">
+          <span v-else-if="quote.status === 'DRAFT' && quote.hasVoice" class="sig" :title="$t('quotes.signals.voice')">
             <PhMicrophone :size="15" aria-hidden="true" />
             <span class="visually-hidden">{{ $t('quotes.signals.voice') }}</span>
           </span>
@@ -207,9 +207,13 @@ const when = computed(() => {
 .sig {
   display: inline-flex;
   align-items: center;
+  flex: none;
   gap: 2px;
   font-size: 11px;
   font-weight: 650;
+}
+.sig :deep(svg) {
+  flex: none;
 }
 .sig--question {
   color: var(--warning);

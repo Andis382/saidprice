@@ -12,7 +12,7 @@
     { "name": "customers", "path": "/customers" },
     { "name": "customer", "path": "/customers/53" },
     { "name": "public-quote", "path": "/q/demo-kitchen-tap", "auth": false, "wait": 900 },
-    { "name": "public-accepted", "path": "/q/Hv65xx4dFgwv4jM7hhYvzg", "auth": false, "wait": 900 },
+    { "name": "public-accepted", "path": "/q/wj4PRt0MfFXCXCSPGtDT0A", "auth": false, "wait": 900 },
     { "name": "messages", "path": "/messages" },
     { "name": "settings", "path": "/settings" }
   ]
